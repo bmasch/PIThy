@@ -1,0 +1,4680 @@
+<html lang="en">
+<head>
+    <title>PIThy -- PIT-tag Data Hypertool</title>
+
+    <meta charset="UTF-8">
+	<link rel="stylesheet" type="text/css" href="/script/dc.js/bootstrap.min.css">
+    <link rel="stylesheet" type="text/css" href="/script/dc.js/dc.css"/>
+<link rel="stylesheet" href="https://code.jquery.com/ui/1.10.2/themes/smoothness/jquery-ui.css" />
+<script src="https://code.jquery.com/jquery-1.9.1.js"></script>
+<script src="https://code.jquery.com/ui/1.10.2/jquery-ui.js"></script>
+	<script src="https://s3.amazonaws.com/stitch-sdks/js/bundles/4.6.0/stitch.js"></script>
+	<script src="https://d3js.org/d3.v3.min.js" charset="utf-8"></script>
+	<script src="https://d3js.org/queue.v1.min.js"></script>
+	<script type="text/javascript" src="/script/crossfilter.min.js"></script>
+	<script type="text/javascript" src="/script/dc.js/dc.js.2.min.js"></script>
+	<script type="text/javascript" src="/script/dc.js/colorbrewer.js"></script>
+	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
+
+ 
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.2/dist/leaflet.css"
+     integrity="sha256-sA+zWATbFveLLNqWO2gtiw3HL/lh1giY/Inf1BJ0z14="
+     crossorigin=""/>
+
+  <script src="https://unpkg.com/leaflet@1.9.2/dist/leaflet.js"
+     integrity="sha256-o9N1jGDZrf5tS+Ft4gbIK7mYMipq9lqpVJ91xHSyKhg="
+     crossorigin=""></script>
+	 
+  <script src="https://unpkg.com/leaflet.vectorgrid@latest/dist/Leaflet.VectorGrid.bundled.js"></script>
+  
+  <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.css"></link>
+  <script src="https://unpkg.com/leaflet.markercluster@1.4.1/dist/leaflet.markercluster.js"></script>
+
+
+  <script type="text/javascript" src="map_utils2.js"></script>
+  <script type="text/javascript" src="/script/CBMap.js"></script>
+  <script type="text/javascript" src="PTAGIS_Names.js"></script>
+  <script type="text/javascript" src="transport_dates.js"></script>
+  <script type="text/javascript" src="/script/jszip.js"></script>  
+  <link rel="stylesheet" href="PITtool.css">
+  <link rel="stylesheet" href="PITtool_elements.css">
+  <link rel="stylesheet" href="/script/piemarkers.css" />  
+  <link rel="stylesheet" href="/script/colorbrewer.css" />
+<style>
+#map_progress {
+    display: none;
+    position: absolute;
+    z-index: 1000;
+    left: 400px;
+    top: 300px;
+    width: 200px;
+    height: 20px;
+    margin-top: -20px;
+    margin-left: -100px;
+    background-color: #fff;
+    background-color: rgba(255, 255, 255, 0.7);
+    border-radius: 4px;
+    padding: 2px;
+}
+
+#map_progress-bar {
+    width: 0;
+    height: 100%;
+    background-color: #76A6FC;
+    border-radius: 4px;
+}
+
+.tip {
+	width: 300px;
+}
+
+p.help_text{
+	font-size: 16;
+	max-width: 600px;
+}
+
+.leaflet-popup-content { width:500px; }	
+img.leaflet-tile{
+	pointer-events: none;
+}
+.action_marker{
+	pointer-events: all;
+	cursor: pointer;
+}	
+#leafmap{
+	width: 950px;
+	height: 650px;
+}
+
+#spinner * { 
+	filter: none; 
+	-moz-opacity: 100%; 
+	position: absolute;
+	top: 200px;
+	left: 650px;
+}
+
+input.fileinput{
+    display: none;
+}
+	
+table {
+	margin: 10px;
+	padding-top: 2px;
+    padding-right: 10px;
+    padding-bottom: 2px;
+    padding-left: 10px;
+}
+
+#drop_zone {
+  border: 2px dashed #bbb;
+  -moz-border-radius: 5px;
+  -webkit-border-radius: 5px;
+  border-radius: 5px;
+  padding: 25px;
+  text-align: center;
+  font: 20pt bold 'Vollkorn';
+  color: #bbb;
+}
+.thumb {
+  height: 75px;
+  border: 1px solid #000;
+  margin: 10px 5px 0 0;
+}
+#progress_bar {
+ 
+  width: 100%;
+  padding: 3px;
+  border: 1px solid #000;
+  font-size: 14px;
+  clear: both;
+  opacity: 0;
+  -o-transition: opacity 1s linear;
+  -moz-transition: opacity 1s linear;
+  -webkit-transition: opacity 1s linear;
+  -ms-transition: opacity 1s linear;
+}
+#progress_bar.loading {
+  opacity: 1.0;
+}
+
+#progress_bar.loaded {
+  opacity: 0;
+}
+
+#progress_bar .percent {
+  background-color: #99ccff;
+  height: auto;
+  width: 0;
+}
+#byte_content {
+  margin: 5px 0;
+  max-height: 100px;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+#byte_range {
+  margin-top: 5px;
+}
+
+svg	{ overflow: hidden; }
+	
+	table {
+	margin: 10px;
+	padding-top: 2px;
+    padding-right: 10px;
+    padding-bottom: 2px;
+    padding-left: 10px;
+	}
+	
+.dc-table-label {
+font-weight: bold;
+}
+
+.header th {
+text-align: center;	
+}
+
+.tiptable {
+	font: 12px sans-serif;
+}
+
+.axis path, .axis line {
+    fill: none;
+    shape-rendering: crispedges;
+    stroke: #000000;
+}
+.grid .tick {
+    stroke: grey;
+    opacity: 0.5 !important;
+}
+.bar rect {
+        fill: #ed1e79;
+    }
+
+.bar text.value {
+	fill: black;
+}
+circle {
+    fill: none;
+    stroke: black; 
+    stroke-width: 1;
+}
+
+.brush .extent {
+  stroke: #fff;
+  fill-opacity: .125;
+  shape-rendering: crispEdges;
+}
+
+div.tooltip {   
+  position: absolute;           
+  text-align: left;                            
+  padding: 2px;             
+  font: 16px sans-serif;        
+  background: #ccc;   
+  border: 0px;      
+  border-radius: 8px;           
+  pointer-events: none;         
+}
+
+text {
+  cursor: default;
+}
+
+path.line:hover{
+	stroke-width: 2px;
+}
+
+.background path {
+  fill: none;
+  stroke: #ddd;
+  shape-rendering: crispEdges;
+}
+
+.foreground path {
+  fill: none;
+  stroke: steelblue;
+}
+
+.brush .extent {
+  fill-opacity: .3;
+  stroke: #fff;
+  shape-rendering: crispEdges;
+}
+
+.axis line,
+.axis path {
+  fill: none;
+  stroke: #000;
+  shape-rendering: crispEdges;
+}
+
+.axis text {
+  text-shadow: 0 1px 0 #fff, 1px 0 0 #fff, 0 -1px 0 #fff, -1px 0 0 #fff;
+  cursor: move;
+}
+
+input[type=range],
+	::-moz-range-track,
+	 ::-ms-track {
+	 -webkit-appearance: none;
+	 background-color: 3f91e5;
+	 width: 250px;
+	 height:40px;
+}
+
+input.vertical {
+	-webkit-appearance: slider-vertical;
+	writing-mode: bt-lr;
+}
+
+
+table td select{
+	font-size: smaller;
+}
+.dropdown_text, select{
+	font-size: 14px;
+}
+a {
+	color: black;
+	font-weight: bold;
+}
+select {
+	height: 26px;
+}
+
+.checkbox-dropdown {
+
+    width: 150px;
+    border: 1px solid silver;
+    cursor: pointer; /* use correct mouse pointer when hovering over the dropdown */
+    padding: 1px;
+    position: relative;
+    margin: 0 auto;
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+}
+
+/* Display CSS arrow to the right of the dropdown text */
+.checkbox-dropdown:after {
+    content:'';
+    height: 0;
+    position: relative;
+    width: 0;
+    border: 6px solid transparent;
+    border-top-color: #000;
+    top: 0px;
+    right: 0px;
+
+    content: "";
+    width: 0;
+    height: 0;
+    position: absolute;
+    right: -15px;
+    top: 50%;
+    margin-top: -6px;
+    border-width: 6px 0 6px 6px;
+    border-style: solid;
+    border: 6px solid transparent;
+    border-top-color: #000; 	
+}
+
+/* Reverse the CSS arrow when the dropdown is active */
+.checkbox-dropdown.is-active:after {
+    border-bottom-color: #000;
+    border-top-color: #fff;
+    margin-top: -9px;
+}
+
+.checkbox-dropdown-list {
+	width: 150px;
+	background-color: aliceblue;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    position: absolute;
+    top: 100%; /* align the dropdown right below the dropdown text */
+    border: inherit;
+    border-top: none;
+    left: -1px; /* align the dropdown to the left */
+    right: -1px; /* align the dropdown to the right */
+    opacity: 0; /* hide the dropdown */
+    -webkit-transition: opacity 0.1s ease-in-out;
+    -moz-transition: opacity 0.1s ease-in-out;
+    -o-transition: opacity 0.1s ease-in-out;
+    -ms-transition: opacity 0.1s ease-in-out;
+    transition: opacity 0.1s ease-in-out;
+    pointer-events: none; /* avoid mouse click events inside the dropdown */
+}
+.is-active .checkbox-dropdown-list {
+    opacity: 1; /* display the dropdown */
+    pointer-events: auto; /* make sure that the user still can select checkboxes */
+}
+
+.checkbox-dropdown-list li label {
+    display: block;
+	margin-top: 5px;
+    border-bottom: 1px solid silver;
+    padding: 0px;
+    -webkit-transition: all 0.2s ease-out;
+    -moz-transition: all 0.2s ease-out;
+    -o-transition: all 0.2s ease-out;
+    -ms-transition: all 0.2s ease-out;
+    transition: all 0.2s ease-out;
+}
+
+.checkbox-dropdown-list li label:hover {
+
+}
+
+li{
+	margin-left: 5px;
+}
+
+</style>
+<div id="spinner"><img src="/images/spinner.gif"></div>
+<div class="page-header">
+	<div class="pithy-logo"><h3 class="pithy-text">PIT<span class="logo-highlight">hy</span></h3></div>
+	<div class="layer-control-btn"><span class="btn header-btn layer-name"></span></div>
+	<div id="mode-buttons" class="page-header-buttons" style="display: block;">
+		</span><span class="options-btn header-btn btn">Options</span><span class="separator"></span><span class="help-btn header-btn btn">Help</span><span class="separator"></span><span class="about-btn header-btn btn">About</span>
+	</div>
+</div>
+<div class="layer-control main-area popup-dialog">
+	<div class="info-box">
+		<div class="info-box-scrolled">
+		<div class="layer-menu">
+			<h3>PTAGIS Files</h3>
+			<div class="pin-all pinnable">
+
+      </div>
+		<div class="layer-list"></div>
+		<div id="drop_zone">
+		Drop or paste files here or&nbsp;<label for="inputTag">&nbsp;click here&nbsp;<input id="inputTag" type="file" class="fileinput"/></label>&nbsp;to select from a folder
+		<div class="subtitle">Accepted:
+			<ul>
+			<li>PTAGIS CSV files</li>
+			</ul>
+		</div>
+
+		</div>
+		<div id="progress_bar"><div class="percent">0%</div></div>
+		</div>
+		
+		<h3>Load Options</h3>
+		<div class="option-menu" style="width: 400px">
+			<h4>Auto Load Attributes</h4>
+			<div><label for="dart-hourly"><input type="checkbox" class="checkbox dart-hourly" onclick="params.get_attributes=this.checked;"/>Load hourly data (DART)</label>
+			<div class="tip-button">?<div class="tip-anchor">
+			<div class="tip">Load pertinent hourly environmental<br>attribute data from DART
+			</div></div></div></div>
+
+		</div>
+		
+		<div class="option-menu" style="width: 400px">
+			<h4>Pre-filtering</h4>
+			<div><label for="remove-zeroevents"><input type="checkbox" class="checkbox remove-zeroevents" onclick="params.remove_zeroevents=this.checked;" checked/>Remove fish with zero events after release</label>
+			<div class="tip-button">?<div class="tip-anchor">
+			<div class="tip">Remove fish for which there are<br>zero events recorded after release
+			</div></div></div></div>
+
+		</div>		
+
+			<h4>Pruning Level</h4>
+			<div class="option-menu" style="width: 400px">
+
+			<div><label><input type="radio" name="prune_level" value="site" class="radio prune_level" checked>Site</label><div class="tip-button">?<div class="tip-anchor">
+			<div class="tip">Removes intermediate detections at a specific interrogation site, within the specified time window from the previous detection at the site.</div></div></div></div>			
+<!--
+			<div><label><input type="radio" name="prune_level" value="antenna_group" class="radio prune_level">Antenna Group</label><div class="tip-button">?<div class="tip-anchor">
+			<div class="tip">Removes intermediate detections at a specific antenna group, within the specified time window from the previous detection at the antenna group.</div></div></div></div>
+
+			<div><label><input type="radio" name="prune_level" value="antenna_id" class="radio prune_level">Antenna</label><div class="tip-button">?<div class="tip-anchor">
+			<div class="tip">Removes intermediate detections at a specific antenna, within the specified time window from the previous detection at the antenna.</div></div></div></div>
+-->
+			<div><label><input type="radio" name="prune_level" value="none" class="radio prune_level">None</label>
+			<div class="tip-button">?<div class="tip-anchor">
+			<div class="tip">Retains all detections.</div></div></div></div>
+
+		</div> <!-- option menu -->		
+		
+		</div>
+	</div>
+</div>
+
+<div class="simplify-options main-area popup-dialog">
+	<div class="info-box">
+		<div class="close2-btn"></div>
+
+
+		<div>
+<!-- 			<div class="cancel-btn btn dialog-btn">Cancel</div> -->
+			<div class="submit-btn btn dialog-btn">Apply</div>
+		</div>
+	</div> <!-- .info-box -->
+</div> <!-- simplify-options -->
+
+<!-- help-options -->
+<div class="help-options main-area popup-dialog">
+	<div class="info-box-scrolled">
+		<div class="info-box" style="overflow: auto; height: 800px">
+		<div class="close2-btn"></div>
+		<h3>PIThy Help</h3>
+<p class="help_text">		
+<em><b>Required PTAGIS Attributes</b></em></br>
+Although the eventual goal for this tool is to be able to process results from several different <a href="https://www.ptagis.org" target = "_new">PTAGIS</a> query types, as well as many from DART, PIThy currently expects output files from PTAGIS Complete Tag History queries.
+If you are now familiar with PTAGIS, it is first necessary to register as a user and enter the Advanced Reporting module. 
+</p>
+<p class="help_text">
+<img src = "Required-PTAGIS-Attrs.png" align = "left" border="0" margin="5"/><br/>
+Shown at left is an optimal set of attributes for a Complete Tag History query. PIThy is designed to work with results at the individual tag level (Tag attribute thus is mandatory), corresponding to a single fish with a known release date and time, and a series of events which are also tracked in time and location.</br>
+Many of the fish-specific attributes are not strictly required, including species, run, and rear type, but if the result set will include multiple types of these, including them will permit filtering by them in the tool. Length is also not required, but can be useful for certain analyses.
+</p>
+<br/><br/>
+<p class="help_text">
+<em><b>Loading Files</b></em></br>
+One or more local files can be loaded into PIThy by either dragging and dropping them into the target area on the start screen or by clicking on the link within the area and selecting with the system file chooser.
+If you wish to have associated environmental variables automatically loaded from DART, check that checkbox before loading files. 
+</p>
+<p class="help_text">
+<em><b>Saving Files</b></em></br>
+To export data and metadata from PIThy, click on the download icon at top of the FishFilter (as shown below, highlighted in yellow). A window will appear to the right offering a choice between formats. Only the (fish) data chosen using the FishFilter is prepared for the export.
+<img src = "Saving-Files.png" border="0" margin="5"/><br/>
+</p>
+<p class="help_text">
+More help is on the way...
+<p>
+	</div></div>
+</div><!-- help-options -->
+
+<!-- about-options -->
+<div class="about-options main-area popup-dialog">
+	<div class="info-box-scrolled">
+	<div class="info-box">
+		<div class="close2-btn"></div>
+		<h3>About PIThy</h3>
+		<!--
+<p class="help_text">He was an old man who fished alone in a skiff in the Gulf Stream and he had gone eighty-four days now without taking a fish. In the first forty days a boy had been with him. But after forty days without a fish the boy's parents had told him that the old man was now definitely and finally <I>salao,</I> which is the worst form of unlucky, and the boy had gone at their orders in another boat which caught three good fish the first week. It made the boy sad to see the old man come in each day with his skiff empty and he always went down to help him carry either the coiled lines or the gaff and harpoon and the sail that was furled around the mast. The sail was patched with flour sacks and, furled, it looked like the flag of permanent defeat.</p><p class="help_text">The old man was thin and gaunt with deep wrinkles in the back of his neck. The brown blotches of the benevolent skin cancer the sun brings from its reflection on the tropic sea were on his cheeks. The blotches ran well down the sides of his face and his hands had the deep-creased scars from handling heavy fish on the cords. But none of these scars were fresh. They were as old as erosions in a fishless desert.</p><p class="help_text">Everything about him was old except his eyes and they were the same color as the sea and were cheerful and undefeated.</p><p class="help_text">"Santiago," the boy said to him as they climbed the bank from where the skiff was hauled up. "I could go with you again. We've made some money."</p><p class="help_text">The old man had taught the boy to fish and the boy loved him.</p><p class="help_text">"No," the old man said. "You're with a lucky boat. Stay with them."</p><p class="help_text">"But remember how you went eighty-seven days without fish and then we caught big ones every day for three weeks."</p><p class="help_text">"I remember," the old man said. "I know you did not leave me because you doubted."</p><p class="help_text">"It was papa made me leave. I am a boy and I must obey him."</p><p class="help_text">"I know," the old man said. "It is quite normal."</p><p class="help_text">"He hasn't much faith."</p><p class="help_text">"No," the old man said. "But we have. Haven't we?"</p><p class="help_text">"Yes," the boy said. "Can I offer you a beer on the Terrace and then we'll take the stuff home."</p><p class="help_text">"Why not?" the old man said. "Between fishermen."</p><p class="help_text">They sat on the Terrace and many of the fishermen made fun of the old man and he was not angry. Others, of the older fishermen, looked at him and were sad. But they did not show it and they spoke politely about the current and the depths they had drifted their lines at and the steady good weather and of what they had seen. The successful fishermen of that day were already in and had butchered their marlin out and carried them laid full length across two planks, with two men staggering at the end of each plank, to the fish house where they waited for the ice truck to carry them to the market in Havana. Those who had caught sharks had taken them to the shark factory on the other side of the cove where they were hoisted on a block and tackle, their livers removed, their fins cut off and their hides skinned out and their flesh cut into strips for salting.</p><p class="help_text">When the wind was in the east a smell came across the harbour from the shark factory; but today there was only the faint edge of the odour because the wind had backed into the north and then dropped off and it was pleasant and sunny on the Terrace.</p><p class="help_text">"Santiago," the boy said.</p><p class="help_text">"Yes," the old man said. He was holding his glass and thinking of many years ago.</p><p class="help_text">"Can I go out to get sardines for you for tomorrow?"</p><p class="help_text">"No. Go and play baseball. I can still row and Rogelio will throw the net."</p><p class="help_text">"I would like to go. If I cannot fish with you, I would like to serve in some way."</p><p class="help_text">"You bought me a beer," the old man said. "You are already a man."</p><p class="help_text">"How old was I when you first took me in a boat?"</p><p class="help_text">"Five and you nearly were killed when I brought the fish in too green and he nearly tore the boat to pieces. Can you remember?"</p><p class="help_text">"I can remember the tail slapping and banging and the thwart breaking and the noise of the clubbing. I can remember you throwing me into the bow where the wet coiled lines were and feeling the whole boat shiver and the noise of you clubbing him like chopping a tree down and the sweet blood smell all over me."</p><p class="help_text">"Can you really remember that or did I just tell it to you?"</p><p class="help_text">"I remember everything from when we first went together."</p><p class="help_text">The old man looked at him with his sun-burned, confident loving eyes.</p><p class="help_text">"If you were my boy I'd take you out and gamble," he said. "But you are your father's and your mother's and you are in a lucky boat."</p><p class="help_text">"May I get the sardines? I know where I can get four baits too."</p><p class="help_text">"I have mine left from today. I put them in salt in the box."</p><p class="help_text">"Let me get four fresh ones."</p><p class="help_text">"One," the old man said. His hope and his confidence had never gone. But now they were freshening as when the breeze rises.</p><p class="help_text">"Two," the boy said.</p><p class="help_text">"Two," the old man agreed. "You didn't steal them?"</p><p class="help_text">"I would," the boy said. "But I bought these."</p><p class="help_text">"Thank you," the old man said. He was too simple to wonder when he had attained humility. But he knew he had attained it and he knew it was not disgraceful and it carried no loss of true pride.</p><p class="help_text">"Tomorrow is going to be a good day with this current," he said.</p><p class="help_text">"Where are you going?" the boy asked.</p><p class="help_text">"Far out to come in when the wind shifts. I want to be out before it is light."</p><p class="help_text">"I'll try to get him to work far out," the boy said. "Then if you hook something truly big we can come to your aid."</p><p class="help_text">"He does not like to work too far out."</p><p class="help_text">"No," the boy said. "But I will see something that he cannot see such as a bird working and get him to come out after dolphin."</p><p class="help_text">"Are his eyes that bad?"</p><p class="help_text">"He is almost blind."</p><p class="help_text">"It is strange," the old man said. "He never went turtle-ing. That is what kills the eyes."</p><p class="help_text">"But you went turtle-ing for years off the Mosquito Coast and your eyes are good."</p><p class="help_text">"I am a strange old man."</p><p class="help_text">"But are you strong enough now for a truly big fish?"</p><p class="help_text">"I think so. And there are many tricks."</p><p class="help_text"><FONT SIZE="-1">Copyright &copy; 1952 by Ernest Hemingway</p><p class="help_text">Copyright renewed &copy; 1980 by Mary Hemingway</FONT></p>
+-->
+<p class="help_text">
+PIThy is a browser-based tool for processing PITtag data collected and maintained by <a href="https://ptagis.org/About/Introduction" target = "_new">PTAGIS</a>.
+<p class="help_text">
+PIThy is currently in an early development stage and feedback is welcome. This project is funded by the Bonneville Power Administration.
+<p>
+	</div></div>
+</div><!-- about-options -->
+
+<!-- export -->
+<div class="export-options main-area popup-dialog">
+	<div class="info-box-scrolled">
+	<div class="info-box">
+		<div class="close2-btn"></div>
+		<h3>Export</h3>
+			<h4>Export Format</h4>
+			<div class="option-menu">
+
+			<div><label><input type="radio" name="export_format" id="json" value="json" class="radio export_format" checked>Single JSON file</label><div class="tip-button">?<div class="tip-anchor">
+			<div class="tip">Uncompressed file in JSON format.</div></div></div></div>			
+
+			<div><label><input type="radio" name="export_format" id="json-zip" value="json-zip" class="radio export_format">Zipped JSON files</label><div class="tip-button">?<div class="tip-anchor">
+			<div class="tip">Zip-compressed JSON files.</div></div></div></div>
+
+			<div><label><input type="radio" name="export_format" id="csv-zip" value="csv-zip" class="radio export_format">Zipped CSV files</label><div class="tip-button">?<div class="tip-anchor">
+			<div class="tip">Zip-compressed CSV files.</div></div></div></div>
+
+		</div> <!-- option menu -->		
+		<div>
+			<div class="cancel-btn btn dialog-btn">Cancel</div>
+			<div id="export_execute" class="submit-btn btn dialog-btn">Proceed</div>
+		</div>
+	</div></div>
+</div><!-- export-options -->
+
+<div class="container-fluid">
+	<div class="row">
+		<div class="span12">
+
+		</div>
+	</div>
+
+	<div class="row">
+		<div class="span12">
+			
+		</div>
+	</div>
+	<div class="row">
+		<div class="span5 fishfilter" style="visibility: hidden; border-right-style: groove">
+			<span class = "mod-title fishfilter">Fish Filter</span>&nbsp;<span class="help-icon">?</span>&nbsp;<img class="download-icon" src="download.png" id="fishfilter_export" style="cursor: pointer;">
+			<hr class="mod-title"/>
+		</div>	
+	</div>
+	
+	<div class="row">
+		<div class="span5 fishfilter" style="visibility: hidden; border-right-style: groove">
+			<div id="dc-data-count">
+				<span class="filter-count"></span> selected out of <span class="total-count"></span> fish&nbsp;<span><a href="javascript:dc.filterAll(); dc.renderAll(); drawSliders() ;params.updateFunctions = doTracks(params.fishtracks.options);">(reset all)</a></span>
+			</div>
+		</div>
+	</div>	
+	<div class="row">
+		<div class="span5 fishfilter" style="visibility: hidden; border-right-style: groove">
+		  <ul class="nav nav-tabs">
+			<li class="active"><a data-toggle="tab" href="#filter1">Fish</a></li>
+			<li><a data-toggle="tab" href="#filter2">Release</a></li>
+			<li><a data-toggle="tab" href="#filter3">Detection</a></li>
+			<li><a data-toggle="tab" href="#filter4">Advanced</a></li>
+		  </ul>
+		<div class="tab-content">
+			<div id="filter1" class="tab-pane fade in active">
+				<div id="pie-species" class="control">
+					<div><strong>Species</strong>
+					<a class="reset" href="javascript:params.fishfilter.reset('species')" style="display: none;">reset</a>
+					</div>
+				</div>			
+				<div id="pie-run" class="control">
+					<div><strong>Run</strong>
+					<a class="reset" href="javascript:params.fishfilter.reset('run')" style="display: none;">reset</a>
+					</div>
+				</div>
+				<div id="pie-rtype" class="control">
+					<div><strong>Rearing</strong>
+					<a class="reset" href="javascript:params.fishfilter.reset('rtype');" style="display: none;">reset</a>
+					</div>
+				</div>
+			</div>
+			<div id="filter2" class="tab-pane fade">
+				<div id="chart-basin" class="control">
+					<div><strong>Release Basin</strong>
+					<a class="reset" href="javascript:params.fishfilter.reset('basin');" style="display: none;">reset</a>
+					</div>
+				</div>		
+				<div id="pie-subbasin" class="control">
+					<div><strong>Release Subbasin</strong>
+					<a class="reset" href="javascript:params.fishfilter.reset('subbasin');" style="display: none;">reset</a>
+					</div>
+				</div>	
+				<div id="pie-rel_site" class="control">
+					<div><strong>Release Site</strong>
+					<a class="reset" href="javascript:params.fishfilter.reset('relsite');" style="display: none;">reset</a>
+					</div>
+				</div>
+				<div id="pie-year" class="control">
+					<div><strong>Release Year</strong>
+					<a class="reset" href="javascript:params.fishfilter.reset('year');" style="display: none;">reset</a>
+					</div>
+				</div>
+				<div id="chart-flength" class="control">
+					<div><strong>Release Length</strong>
+					<a class="reset" href="javascript:params.fishfilter.reset('flength');" style="display: none;">reset</a>
+					</div>
+				</div>		
+
+				<div id="pie-transport" class="control">
+					<div><strong>Transported</strong>
+					<a class="reset" href="javascript:params.fishfilter.reset('transport');" style="display: none;">reset</a>
+					</div>
+				</div>			
+			</div>	
+			<div id="filter3" class="tab-pane fade">		
+				<div id="pie-dbasin" class="control">
+					<div><strong>Detected In Basin</strong>
+					<a class="reset" href="javascript:params.fishfilter.reset('dbasin');" style="display: none;">reset</a>
+					</div>
+				</div>
+				<div id="pie-dsubbasin" class="control">
+					<div><strong>Detected In Subbasin</strong>
+					<a class="reset" href="javascript:params.fishfilter.reset('dsubbasin');" style="display: none;">reset</a>
+					</div>
+				</div>
+				<div id="pie-dsites" class="control">
+					<div><strong>Detected At</strong>
+					<a class="reset" href="javascript:params.fishfilter.reset('dsites');" style="display: none;">reset</a>
+					</div>
+				</div>
+				<div id="pie-lastsite" class="control">
+					<div><strong>Last Detected At</strong>
+					<a class="reset" href="javascript:params.fishfilter.reset('lastsite');" style="display: none;">reset</a>
+					</div>
+				</div>				
+			</div>
+			<div id="filter4" class="tab-pane fade">
+				<table>
+				<tr><td><input id="filterlabel" type="text" placeholder="description&hellip;" size=15/></td>
+				<td><button type="button" id="newfilterbutton">Add</button></td></tr>
+				</table>
+			</div>
+			<div id="filter5" class="tab-pane fade">
+			</div>	
+		</div>	
+	</div>
+	
+	<div class="span12 components" style="visibility: hidden">
+		<div class="row">
+		  <ul class="nav nav-tabs">
+			<li class="active"><a data-toggle="tab" href="#filter10">Map</a></li>
+			<li><a data-toggle="tab" href="#filter20">Fish Tracks</a></li>
+		  </ul>
+
+			<div class="tab-content">
+				<div id="filter10" class="tab-pane fade in active">
+					<div class="row">
+					<div id="map_progress"><div id="map_progress-bar"></div></div>
+					</div>
+					<div class="row">
+						<div id="leafmap" class="span12">
+						Initializing Map...
+						</div>
+					</div>
+					<div class="row">
+						<div class="span4">
+							<h4>Pie Options</h4>
+						</div>
+					</div>
+					<table id="pie_options_table" cellpadding=2 cellspacing=2>
+					<tr>
+						<td>&nbsp;</td>
+						<td>
+							<b>Event Date Range</b>:
+						</td>
+						<td>&nbsp;&nbsp;</td>
+						<td colspan="2">
+							<div id="event_date_slider"></div>
+							<p><span id="event_dates"/></p>
+						</td>
+					</tr>
+					<tr>
+						<td>&nbsp;</td>
+						<td width=120>
+							<b>Event Types:</b>
+						</td>
+						<td>&nbsp;&nbsp;</td>
+						<td colspan="2">
+							<input class="event_filter_option" type="checkbox" name="event_type" value="Mark">&nbsp;Mark</input>&nbsp;&nbsp;
+							<input class="event_filter_option" type="checkbox" name="event_type" value="Release" checked>&nbsp;Release</input>&nbsp;&nbsp;						
+							<input class="event_filter_option" type="checkbox" name="event_type" value="Observation" checked>&nbsp;Observation</input><br/>
+							<input class="event_filter_option" type="checkbox" name="event_type" value="Recapture" checked>&nbsp;Recapture</input>&nbsp;&nbsp;
+							<input class="event_filter_option" type="checkbox" name="event_type" value="Recovery" checked>&nbsp;Recovery</input>&nbsp;&nbsp;
+							<input class="event_filter_option" type="checkbox" name="event_type" value="Passive Recovery" checked>&nbsp;Passive Recovery</input>			
+						</td>
+					</tr>
+					<tr>
+						<td>&nbsp;</td>
+						<td>
+							<b>Pie Slice Mode:</b>
+						</td>
+						<td>&nbsp;&nbsp;</td>
+						<td colspan="2">
+							<input class="pie_mode" type="radio" name="pie_mode" value="event" checked>&nbsp;fish/event attributes</input>&nbsp;&nbsp;
+							<input class="pie_mode" type="radio" name="pie_mode" value="measure">&nbsp;environmental metrics</input>&nbsp;&nbsp;							
+						</td>
+					</td>
+					<tr>
+						<td>&nbsp;</td>
+						<td>
+							<b>Event Variable:</b>
+						</td>
+						<td>&nbsp;&nbsp;</td>					
+						<td width=275>
+						<select id="pie_event_variable">
+							<option value="type">Event Type</option>
+							<option value="species">Species</option>
+							<option value="rtype">Rearing Type</option>
+							<option value="run_name">Fish Run</option>
+							<option value="release_basin">Release Basin</option>
+							<!--<option value="basin_status">in release basin?</option>-->
+						</select>
+						</td>
+						<td width=120>
+							<b>Enviro Variable:</b>
+						</td>
+						<td>&nbsp;&nbsp;</td>					
+						<td width=275>
+						<select id="pie_enviro_variable" style="disabled = 'disabled'">
+							<option value="Temperature (C)">Temp (C)</option>
+							<option value="Dissolved Gas Percent (%)">TDG (%)</option>
+							<option value="Spill Percent (%)">Spill (%)</option>
+						</select>
+						</td>
+					</tr>					
+					<tr>
+						<td>&nbsp;</td>
+						<td>
+							<b>Pie Palette:</b>
+						</td>
+						<td>&nbsp;&nbsp;</td>
+						<td>
+						<select id="pie_palette_options">
+							<option value="YlGn">YlGn</option>
+							<option value="YlGnBu">YlGnBu</option>
+							<option value="GnBu">GnBu</option>
+							<option value="BuGn">BuGn</option>
+							<option value="PuBuGn">PuBuGn</option>
+							<option value="PuBu">PuBu</option>
+							<option value="BuPu">BuPu</option>
+							<option value="RdPu">RdPu</option>
+							<option value="PuRd">PuRd</option>
+							<option value="OrRd">OrRd</option>
+							<option value="YlOrRd">YlOrRd</option>
+							<option value="YlOrBr">YlOrBr</option>
+							<option value="Purples">Purples</option>
+							<option value="Blues">Blues</option>
+							<option value="Greens">Greens</option>
+							<option value="Oranges">Oranges</option>
+							<option value="Reds">Reds</option>
+							<option value="Greys">Greys</option>
+							<option value="PuOr">PuOr</option>
+							<option value="BrBG">BrBG</option>
+							<option value="PRGn">PRGn</option>
+							<option value="PiYG">PiYG</option>
+							<option value="RdBu">RdBu</option>
+							<option value="RdGy">RdGy</option>
+							<option value="RdYlBu">RdYlBu</option>
+							<option value="Spectral">Spectral</option>
+							<option value="RdYlGn">RdYlGn</option>
+						</select>
+						</td>
+					</tr>
+					</table>
+				</div>
+
+				<div id="filter20" class="tab-pane fade">
+					<div id="fishplot"/>
+				</div>			
+			</div>
+		</div>	
+	</div>
+</div>
+
+</div>
+
+</div>
+
+<script>
+  var params = {
+    get_attributes: false,
+	remove_zeroevents: true,
+	promises: [],
+	onUpdateFxns: [],
+	export_options:
+		{
+			FishFilter: {
+				attributes: true,
+				metadata: true,
+				filetype: "json"	
+			}
+		},
+	handlers:
+	{
+		process_files: function(){
+		console.log("process_files")
+			Promise.all(params.promises).then(function() {
+				//consider using allSettled() :
+				// https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise/allSettled
+				params.promises = []
+				params.fishdata.tossFish()
+				params.fishdata.sortEvents()
+				params.fishdata.pruneEvents()
+				params.edata.setFishArray(params.fishdata.fisharray)
+				if(params.get_attributes)params.edata.fetchData()
+				else{
+					d3.select(".layer-control").style("display","none")
+					d3.select(".layer-control-btn").classed("active",true)
+					d3.select("span.layer-name").html(params.fishdata.fileCountText() + "&nbsp;▼")
+					d3.selectAll(".fishfilter").style("visibility","visible")
+					d3.selectAll(".components").style("visibility","visible")
+					params.fishfilter = new FishFilter({fishfarm: params.fishdata})
+					params.fishfilter.init()
+					params.eventfilter = new EventFilter({sitemap:params.sitemap})
+					params.eventfilter.setData(params.fishfilter.filteredData()).init()
+					params.fishtracks.doTracks()
+					params.fishfilter.onChangeFxns.push(params.fishtracks.doTracks.bind(params.fishtracks))
+					params.fishfilter.onChangeFxns.push(function(){params.eventfilter.setData(params.fishfilter.filteredData()).init()})
+					if(!params.leafmap){
+						params.leafmap = new CBMap({target: "leafmap", center: [47,-120], zoom: 6})
+						params.leafmap.initMap()
+						params.riverlayer = new RiverVectorLayer({map:params.leafmap})
+						params.leafmap.addOverlay(params.riverlayer.layer,"Rivers",true)
+						L.control.legend({ position: 'topleft', id: "pie_legend" }).addTo(params.leafmap.getMap());					
+					}					
+					params.pielayer = new ClusterPieLayer({data: params.eventfilter.filteredData.bind(params.eventfilter),categoryField: "type", map: params.leafmap.getMap()})
+					params.eventfilter.onChangeFxns.push(function(){if(d3.selectAll(".pie_mode")[0][1].checked==true)params.eventfilter.setMeasureMode("measure")})						
+					params.eventfilter.onChangeFxns.push(params.pielayer.update.bind(params.pielayer))
+					document.getElementById("spinner").style.visibility = 'hidden';				
+				}
+			})
+		},
+		process_remote_file: function(){
+			console.log("process remote file")
+			params.fishdata.tossFish()
+			params.fishdata.sortEvents()
+			params.fishdata.pruneEvents()
+			params.edata.setFishArray(params.fishdata.fisharray)
+			if(params.get_attributes)params.edata.fetchData()
+			else{
+				d3.select(".layer-control").style("display","none")
+				d3.select(".layer-control-btn").classed("active",true)
+				d3.select("span.layer-name").html(params.fishdata.fileCountText() + "&nbsp;▼")
+				d3.selectAll(".fishfilter").style("visibility","visible")
+				d3.selectAll(".components").style("visibility","visible")
+				params.fishfilter = new FishFilter({fishfarm: params.fishdata})
+				params.fishfilter.init()
+				params.eventfilter = new EventFilter({sitemap:params.sitemap})
+				params.eventfilter.setData(params.fishfilter.filteredData()).init()				
+				if(!params.leafmap){
+					params.leafmap = new CBMap({target: "leafmap", center: [47,-120], zoom: 6})
+					params.leafmap.initMap()
+					params.riverlayer = new RiverVectorLayer({map:params.leafmap})
+					params.leafmap.addOverlay(params.riverlayer.layer,"Rivers",true)
+					L.control.legend({ position: 'topleft', id: "pie_legend" }).addTo(params.leafmap.getMap());					
+				}
+				params.fishtracks.doTracks()
+				params.fishfilter.onChangeFxns.push(params.fishtracks.doTracks.bind(params.fishtracks))
+				params.fishfilter.onChangeFxns.push(function(){params.eventfilter.setData(params.fishfilter.filteredData()).init()})
+				params.pielayer = new ClusterPieLayer({data: params.eventfilter.filteredData.bind(params.eventfilter),categoryField: "type", map: params.leafmap.getMap()})
+				params.eventfilter.onChangeFxns.push(function(){if(d3.selectAll(".pie_mode")[0][1].checked)params.eventfilter.setMeasureMode("measure")})					
+				params.eventfilter.onChangeFxns.push(params.pielayer.update.bind(params.pielayer))			
+				document.getElementById("spinner").style.visibility = 'hidden';				
+			}
+		},
+		process_attrs: function(){
+			console.log("process_attrs")
+			Promise.all(params.promises).then(function() {
+				d3.select(".layer-control").style("display","none")
+				d3.select(".layer-control-btn").classed("active",true)
+				d3.select("span.layer-name").html(params.fishdata.fileCountText() + "&nbsp;▼")
+				params.progressbar.clear()
+				params.edata.assignEnviroData()
+				d3.selectAll(".fishfilter").style("visibility","visible")
+				d3.selectAll(".components").style("visibility","visible")
+				params.fishfilter = new FishFilter({fishfarm: params.fishdata})
+				params.fishfilter.init()
+				params.eventfilter = new EventFilter({sitemap:params.sitemap})
+				params.eventfilter.setData(params.fishfilter.filteredData()).init()
+				if(!params.leafmap){
+					params.leafmap = new CBMap({target: "leafmap", center: [47,-120], zoom: 6})
+					params.leafmap.initMap()
+					params.riverlayer = new RiverVectorLayer({map:params.leafmap})
+					params.leafmap.addOverlay(params.riverlayer.layer,"Rivers",true)
+					L.control.legend({ position: 'topleft', id: "pie_legend" }).addTo(params.leafmap.getMap());					
+				}
+				params.fishtracks.doTracks()
+				params.fishfilter.onChangeFxns.push(params.fishtracks.doTracks.bind(params.fishtracks))
+				params.fishfilter.onChangeFxns.push(function(){params.eventfilter.setData(params.fishfilter.filteredData()).init()})
+				params.pielayer = new ClusterPieLayer({data: params.eventfilter.filteredData.bind(params.eventfilter),categoryField: "type", map: params.leafmap.getMap()})
+				params.eventfilter.onChangeFxns.push(function(){if(d3.selectAll(".pie_mode")[0][1].checked)params.eventfilter.setMeasureMode("measure")})					
+				params.eventfilter.onChangeFxns.push(params.pielayer.update.bind(params.pielayer))
+				document.getElementById("spinner").style.visibility = 'hidden';				
+			})
+		}
+	}
+  }
+  
+  
+  function handleFileSelect(evt) {
+    //document.getElementById("spinner").style.visibility = 'visible';
+	function handleProgress(event) {
+		params.progressbar.updateProgress(event.loaded,event.total,"loading and processing file(s)")
+	}	
+    evt.stopPropagation();
+    evt.preventDefault();
+	params.promises = [];
+    var files = evt.dataTransfer.files; // FileList object.
+	params.progressbar.init();
+	
+	Object.keys(files).forEach(function(f,i){
+			console.log(files[f])
+			//params.progressbar.updateProgress(50,100,"loading local file(s)")
+			params.promises.push(new Promise(function(resolve, reject) {
+			var reader = new FileReader();
+		    reader.onload = function fileReadCompleted(){
+				var newfish = new PTAGIS({file: files[f], processor: params.fishdata, result: reader.result})
+				resolve(true)
+			}
+			reader.addEventListener("progress",handleProgress);			
+			reader.readAsText(files[f]);
+		}))
+	})
+	
+	params.handlers.process_files()
+
+	
+  }
+ 
+
+  function handleDragOver(evt) {
+    evt.stopPropagation();
+    evt.preventDefault();
+    evt.dataTransfer.dropEffect = 'copy'; // Explicitly show this is a copy.
+  }
+
+  // Setup the dnd listeners.
+  var dropZone = document.getElementById('drop_zone');
+  dropZone.addEventListener('dragover', handleDragOver, false);
+  dropZone.addEventListener('drop', handleFileSelect, false);
+</script>
+
+<script>
+//https://www.html5rocks.com/en/tutorials/file/dndfiles//
+	var res;
+
+/*	
+  document.getElementById("fileOutput").addEventListener('click', function saveFile() {
+	params.fishdata.saveToJSON()
+  });
+*/  
+  
+  document.getElementById("inputTag").addEventListener('change', function getFile(){
+	//document.getElementById("spinner").style.visibility = 'visible';
+	params.promises = [];
+	var _this = this
+	Object.keys(_this.files).forEach(function(f){
+			params.promises.push(new Promise(function(resolve, reject) {
+			var reader = new FileReader();
+		    reader.onload =function fileReadCompleted(){
+				var newfish = new PTAGIS({file: _this.files[f], processor: params.fishdata, result: reader.result})
+				resolve(true)
+			}
+			reader.readAsText(_this.files[f]);
+		}))
+	})
+	
+	params.handlers.process_files()
+	/*
+	Promise.all(params.promises).then(function() {
+		params.fishdata.sortEvents()
+		params.fishdata.pruneEvents()
+		params.edata.setFishArray(params.fishdata.fisharray)
+		params.fishfilter = new FishFilter({fishfarm: params.fishdata})
+		params.fishfilter.init()
+		params.fishtracks.doTracks()
+		params.fishfilter.onChangeFxns.push(params.fishtracks.doTracks.bind(params.fishtracks))		
+		document.getElementById("spinner").style.visibility = 'hidden';	
+
+		
+	});
+*/	
+});
+</script> 
+
+<script>
+
+class CompPanel{
+	constructor(options){
+		if (!options.target) {
+			console.log(options)
+			return null;
+		}
+		this.target = options.target;
+		this.panels = []
+		this.index = 0;
+	}
+}
+
+
+
+class FishTracks{
+	constructor(options){
+		this.basins_sites = options.basins_sites;
+		this.sites_basins = {};//look up table for basin id (integer) using site code
+		this.basins_index = {};//look up table for basin id (integer) using basin name
+		this.sites_index = {};//integer representing order within basin
+		this._basins = {};
+		this.basins = [];
+		this.adultladders = ["BO1","BO2","BO3","BO4","TD1","TD2","JO1","JO2","MC1","MC2","ICH","LMA","GOA","GRA","PRA","RIA","RRF","WEA"]
+		
+		this.reset_basins();
+		d3.selection.prototype.moveToFront = function() { 
+			return this.each(function() { 
+			  this.parentNode.appendChild(this); 
+			}); 
+		  };
+	}
+
+	reset_basins(){
+		var _this = this;
+		var _basin = 0;
+		this.basins_sites.forEach(function (d) {
+			var name = d.name;
+			d.open=false;
+			d.active=false;
+			d.active_sites = [];//keeps track of whether site has any detections
+			for(var i=0;i<d.sites.length;i++){
+				_this.sites_basins[d.sites[i]]=_basin;
+				_this.sites_index[d.sites[i]]=i;
+				d.active_sites.push(false);
+			}
+			_this.basins_index[name]=_basin;
+			_basin++;
+		});	
+	}
+
+	getBasinSite(site){
+	//if basin branch is open, return site
+			var basin = this.basins_sites[this.sites_basins[site]];
+			if(basin.open)return site;
+			else return basin.name;	
+	}
+
+
+	getDomain(){
+		//get array of basins + sites for the open one
+		var _this = this;
+		var names = [];
+		this.basins_sites.forEach(function (d) {
+			if(d.active){
+				if(d.open){
+					names.push(d.name)
+					for(var i=0;i<d.sites.length;i++){
+						if(d.active_sites[i])names.push(d.sites[i]);//only add if there are detections
+					}
+				}
+				else names.push(d.name);
+			}
+		});
+		return names;
+	}
+	
+	doTracks(opts){
+
+		//internal functions********************************
+
+		var flowInRange = function(d) { 
+			if(!currentRange || d.date1 < currentRange[0] || d.date2 > currentRange[1] ) {
+				//console.log("hidden");
+				return "hidden";
+			} else {
+				//console.log("visible");
+				return "visible";
+			}
+		}
+
+		var damFlowInRange = function(d) { 
+			if(!currentRange || d.date < currentRange[0] || d.date > currentRange[1] ) {
+				//console.log("hidden");
+				return "hidden";
+			} else {
+				//console.log("visible");
+				return "visible";
+			}
+		}
+
+		function checkInRange(d){return d.date >= currentRange[0] && d.date <= currentRange[1]
+		}
+
+		function bar_width(){
+			return(x(tdate2)-x(tdate1))
+		}	
+			
+		function addClass(d){
+			var tag_code = d.getFish().tag_code;
+			var c1 = "TAG" + tag_code.split(".")[1];
+			var c2;
+			if(_this.getBasinSite(d.site)==d.site)c2 = "SITE" + d.site;
+			else c2 = "SITE" + _this.getBasinSite(d.site).replace(/ /g,"-");
+			return c1 + " " + c2;
+		}
+
+		function trimDetections(detections){
+			var trimmed = [];
+			for(var i=0;i<detections.length;i++){
+				if(!currentRange)trimmed.push({x:x(detections[i].date), y: y(_this.getBasinSite(detections[i].site))});
+				else if (checkInRange(detections[i]))trimmed.push({x:x(detections[i].date), y: y(_this.getBasinSite(detections[i].site))});
+				else if(detections[i+1] && checkInRange(detections[i+1])){
+					var range0 = x(currentRange[0]);
+					var range1 = x(currentRange[1]);
+					var x0 = x(detections[i].date);
+					var x1 = x(detections[i+1].date);
+					var y0 = y(_this.getBasinSite(detections[i].site))
+					var y1 = y(_this.getBasinSite(detections[i+1].site))
+					var xmult = (range0-x0)/(x1-x0)
+					var y2 = y0 + xmult*(y1-y0)
+					trimmed.push({x: range0, y: y2});
+				}
+				else if(detections[i-1] && checkInRange(detections[i-1])){
+					var range0 = x(currentRange[0]);
+					var range1 = x(currentRange[1]);
+					var x0 = x(detections[i-1].date);
+					var x1 = x(detections[i].date);
+					var y0 = y(_this.getBasinSite(detections[i-1].site))
+					var y1 = y(_this.getBasinSite(detections[i].site))
+					var xmult = (range1-x0)/(x1-x0)
+					var y2 = y0 + xmult*(y1-y0)
+					trimmed.push({x: range1, y: y2});		
+				} 
+			}
+			return trimmed;
+		}	
+
+		//bar height and width for flows
+		function bar_height(){
+			return (y(this.getDomain()[1])-y(this.getDomain()[0]))*.9*options.flowscale;
+		}
+
+		function brushed() {
+		  currentRange = (brush.empty()? undefined : brush.extent());
+		  x.domain(brush.empty() ? x2.domain() : brush.extent());
+		  focus.selectAll(".fish").select(".line").attr("d", function (d) {return line3(trimDetections(d.events));})
+		//		.style("visibility", function (d) {return inRange(d.detections[0]);});
+		  focus.selectAll("circle")
+				.attr("cx", function (d) { return x(d.date); })
+				.attr("cy", function (d) { return y(_this.getBasinSite(d.site)); })
+				.style("visibility", inRange);
+		  focus.select(".x.axis").call(xAxis);
+		  
+		  focus.selectAll(".flowline")
+			.attr("x1", function(d){return x(d.date1)})
+			.attr("y1", function(d){return y(_this.getBasinSite(d.site1)); })
+			.attr("x2", function(d){return x(d.date2)})
+			.attr("y2", function(d){return y(_this.getBasinSite(d.site2)); }) 
+			.style("visibility", flowInRange);
+			
+			focus.selectAll(".flowbar")
+			.attr("x",function(d){return x(d.date);})
+			.attr("y",function(d){return y(_this.getBasinSite(d.site));})
+			.attr("height",function(d){return d.outflow/damflowmax*bar_height();})
+			.attr("width",bar_width())
+			.style("visibility", damFlowInRange);
+			
+			focus.selectAll(".spillbar")
+			.attr("x",function(d){return x(d.date);})
+			.attr("y",function(d){return y(this.getBasinSite(d.site));})
+			.attr("height",function(d){return d.spill>0 ? d.spill/damflowmax*bar_height(): 0;})
+			.attr("width",bar_width())
+			.style("visibility", damFlowInRange);
+
+			trimMonths();
+		}
+
+		function trimMonths(){
+			var months = {"January": "Jan","February": "Feb","March": "Mar","April":"Apr","June": "Jun","July":"Jul","August":"Aug", "September":"Sep","October": "Oct","November":"Nov", "December":"Dec"}
+			focus.select(".x.axis").selectAll(".tick").select("text").each(function(){
+				var text = d3.select(this).text();
+				if(months[text])d3.select(this).text(months[text])
+			})
+		}
+			
+		function make_y_axis() {    // function for the y grid lines
+		  return d3.svg.axis().scale(y).orient("left").ticks(5)
+		}
+
+		function setFlowLines(){
+			flows
+			.selectAll(".flowline")
+			.data(flowdata)
+			.enter()
+			.append("line")
+			.attr("class","flowline")
+			.attr("x1", function(d){return x(d.date1)})
+			.attr("y1", function(d){return y(this.getBasinSite(d.site1)); })
+			.attr("x2", function(d){return x(this.d.date2)})
+			.attr("y2", function(d){return y(this.getBasinSite(d.site2)); })
+			.attr("stroke-width", 1)
+			//.attr("stroke", "blue")
+			.style("stroke-dasharray", ("8, 10"))
+			.style('stroke', function(d) { 
+					if(options.flowtemp)return getTempColor(d);
+					else return "blue";
+			})
+			.style("visibility", flowInRange)
+			.on("mouseover", function(d) {
+					var site = {date: dateFormat1(d.date1),temp: d.temperature,flow: d.flow, spill: d.spill};
+					tipdiv.transition()        
+						.duration(20)      
+						.style("opacity", 1);      
+					tipdiv.html('<b>' + site.date + ' | Temp(C): ' + site.temp + '<br><b>Flow: ' + d.flow + '<br><b>Spill:</b> ' + d.spill)  
+						.style("left", (d3.event.pageX + 20) + "px")     
+						.style("top", (d3.event.pageY - 14) + "px");    
+					})                  
+				.on("mouseout", function(d) {       
+					tipdiv.transition()        
+						.duration(20)      
+						.style("opacity", 0);   
+				});
+		}
+
+		function sizeFish(detections){
+			var fishsize = [];
+			detections.forEach(function(d){
+				var fsize = {};
+				if(d.length)fsize.length=d.length;
+				if(d.weight)fsize.weight=d.weight;
+				if(fsize.length | fsize.weight)fishsize.push(fsize);
+			});
+		}
+
+		function countFish(){
+			var temp = focus.selectAll("circle").filter(function(d){ return d3.select(this).style('opacity') != 0 });
+			var sitecount = {}
+			temp[0].forEach(function (d) {
+				var att = d.getAttribute("class");
+				var i1 = att.indexOf("TAG");
+				var i2 = att.indexOf("SITE");
+				var site = att.substring(i2);
+				site = site.substring(4);
+				if(!sitecount[site])sitecount[site] = {};
+				sitecount[site][att] = true;
+			});
+			var fishcount = [];
+
+			Object.keys(sitecount).forEach(function(d){
+				fishcount.push({site: d.replace(/-/g," "), count: Object.keys(sitecount[d]).length});
+			});
+			svg.append("g")
+				.attr("id", "fishcounts")
+				.attr("transform", "translate(" + (margin.left+width) + "," + margin.top + ")")
+				.selectAll("g")
+				.data(fishcount)
+				.enter()
+				.append("g")
+				.attr("transform", function(d){
+					return "translate(" + 5 + "," + (y(d.site)+5) + ")"
+				})
+				.append("text").text(function(d){
+					//console.log(d.site + "," + d.count)
+					return d.count;
+				})
+				;
+		}
+
+		function countBox(nfish,ndetect){
+			var offset=0;
+			if(nfish>0)offset = Math.log(nfish)*5 + 30;
+			var _x = Math.max(countbox[0][0],countbox[1][0]) + 5;
+			if(_x > width-75)_x= Math.min(countbox[0][0],countbox[1][0]) - offset;
+			var _y = Math.min(countbox[0][1],countbox[1][1]);
+
+			focus.append('rect')
+					.attr('x', Math.min(countbox[0][0],countbox[1][0]))
+					.attr('y', _y)
+					.attr('width', Math.abs(countbox[1][0]-countbox[0][0]))
+					.attr('height', Math.abs(countbox[1][1]-countbox[0][1]))
+					.attr('id', 'countbox')
+					.style('fill', "none")
+					.style("stroke", "black");
+			focus.append('text')
+				.attr('x', _x)
+				.attr('y', _y)
+				.attr('id', 'counttext2')
+				.attr("class", "shadow")
+				.text(nfish + " fish");
+			focus.append('text')
+				.attr('x', _x)
+				.attr('y', _y)
+				.attr('id', 'counttext')
+				.text(nfish + " fish");
+		}
+
+		function updateFishColor(opts){
+			if(opts){
+			Object.keys(opts).forEach(function(d){
+				options[d] = opts[d];
+			})
+			}
+			focus.selectAll(".fish").selectAll("circle").style('fill', options.fishcolor);
+			focus.selectAll(".fish").selectAll(".line").style("stroke", options.trackcolor);
+		}
+
+		function updateFishOpacity(opts){
+			if(opts){
+			Object.keys(opts).forEach(function(d){
+				options[d] = opts[d];
+			})
+			}
+			focus.selectAll(".fish").selectAll("circle").style('opacity', options.fish_opacity);
+		}
+
+		function updateTrackOpacity(opts){
+			if(opts){
+			Object.keys(opts).forEach(function(d){
+				options[d] = opts[d];
+			})
+			}
+			focus.selectAll(".fish").selectAll(".line").style("opacity", options.track_opacity);
+		}
+
+		function updateFlowScale(opts){
+			if(opts){
+			Object.keys(opts).forEach(function(d){
+				options[d] = opts[d];
+			})
+			}
+			focus.selectAll(".flowbar").attr("height",function(d){return d.outflow/damflowmax*bar_height();})	
+			focus.selectAll(".spillbar").attr("height",function(d){return d.spill>0 ? d.spill/damflowmax*bar_height(): 0;})
+		}
+		
+		function getFlowLineData(){
+			flowdata = []
+			options.flowlines.forEach(function(d){
+				d.data.forEach(function(dd){
+					if(dd.date1>min_date & dd.date2<max_date)flowdata.push(dd)
+				})
+			})
+		}
+
+		function getDamFlowData(){
+			damflowdata = [];
+			damflowmax = 0;
+			if(options.damflows.length>0){
+				var date = new Date(min_date.getFullYear()+"/"+min_date.getMonth()+"/"+min_date.getDate());
+				while(date<max_date){
+					options.damflows.forEach(function(d){
+					var value = params.damdata[d.dam][date]
+						if(value && value.Outflow>0){
+							damflowdata.push({
+								dam: d.dam,
+								site: d.site,
+								date: new Date(date),
+								outflow: value.Outflow,
+								spill: value.Spill,
+								dgas: value.Degas,
+								temperature: value.Temp,
+								Temp: value.Temp,
+								TempTW: value.TempTW,
+								dgasTW: value.dgasTW
+							})
+							if(value.Outflow>damflowmax)damflowmax = value.Outflow
+						}	
+					})
+					date.setDate(date.getDate()+1)
+				}
+			}
+		}	
+
+		function setDamFlow(){
+				var _this = this;
+				damflow
+				.selectAll(".flowbar")
+				.data(damflowdata)
+				.enter()
+				.append("rect")
+				.attr("class","flowbar")
+				.attr("x",function(d){return x(d.date);})
+				.attr("y",function(d){return y(this.getBasinSite(d.site));})
+				.attr("height",function(d){return d.outflow/damflowmax*bar_height();})
+				.attr("width",bar_width())
+				.style("fill",function(d){
+					return d[options.tempvariable]>0 ? options.tempscale(d[options.tempvariable]): "gray"
+				})
+				.style("fill-opacity",.6)
+				.style("opacity",.7)
+				.style("visibility", damFlowInRange);
+				
+				
+				spillflow
+				.selectAll(".spillbar")
+				.data(damflowdata)
+				.enter()
+				.append("rect")
+				.attr("class","spillbar")
+				.attr("x",function(d){return x(d.date);})
+				.attr("y",function(d){return y(_this.getBasinSite(d.site));})
+				.attr("height",function(d){return d.spill>0 ? d.spill/damflowmax*bar_height(): 0;})
+				.attr("width",bar_width())
+				.style("fill",function(d){
+					return d[options.tempvariable]>0 ? options.tempscale(d[options.tempvariable]): "gray"
+				})
+				.style("stroke",function(d){
+					return d[options.tempvariable]>0 ? options.tempscale(d[options.tempvariable]): "gray"
+				})
+				.style("fill-opacity",.6)
+				.style("opacity",.8)
+				.style("visibility", damFlowInRange);
+		}
+
+		function updateDamFlow(opts){
+			if(opts){
+			Object.keys(opts).forEach(function(d){
+				options[d] = opts[d];
+			})
+			}
+			d3.selectAll(".flowbar").remove();
+			d3.selectAll(".spillbar").remove();
+			getDamFlowData();
+			setDamFlow();
+		}
+
+		function updateFlowLines(opts){
+			if(opts){
+			Object.keys(opts).forEach(function(d){
+				options[d] = opts[d];
+			})
+			}
+			d3.selectAll(".flowline").remove();
+			getFlowLineData();
+			setFlowLines();	
+		}
+	//set color scheme TBD
+		var getColor = function(d){
+			var color = d3.scale.category10();
+			if(params.edata.data){
+				//var date = 
+			}
+			/*		
+			if(params.color_coding == "rel_site")_colorcoding=relsites;
+			else _colorcoding=["W","H","U"];
+			color.domain(_colorcoding);
+			//if(color_coding == "rel_site")return color(d.rel_site);
+			if(params.color_coding == "none")return "#888888";
+			else return color(d[color_coding]);
+			*/
+			return "#888888"
+		}
+
+		var getTempColor = function(d){
+			var thermal = ["#67001f","#b2182b","#d6604d","#f4a582","#fddbc7","#f7f7f7","#d1e5f0","#92c5de","#4393c3","#2166ac","#053061"];
+			if(d.temperature == 99)d.temperature = "NA";
+			if(d.temperature == "NA")return "#cccccc";
+			else if(d.temperature < 10)return thermal[10];
+			else if(d.temperature < 15)return thermal[9];
+			else if(d.temperature < 18)return thermal[8];
+			else if(d.temperature < 20)return thermal[7];
+			else if(d.temperature < 21)return thermal[6];
+			//else if(d.temperature < 20)return thermal[5];
+			//else if(d.temperature < 21)return thermal[4];
+			else if(d.temperature < 22)return thermal[3];
+			else if(d.temperature < 22.5)return thermal[2];
+			else if(d.temperature < 23)return thermal[1];
+			else return thermal[0];
+		}
+		
+		function filterEvents(events){
+			return events.filter(function(event){return event.type != "Mark"})
+		}
+
+		function getEdata(d){
+			let dateFormat = d3.time.format("%Y-%m-%d");
+			if(params.edata.data){
+				
+			}
+		}
+		
+		function countPostReleaseEvents(fish){
+			return Object.keys(fish.sites).sum(d => {return fish.sites[d].length})
+		}
+		
+	//end internal functions****************************
+		var _this = this;
+		let dateFormat1 = d3.time.format("%m/%d/%Y");
+		var options = {
+			fishcolor: function(d){return "#888888"},
+			fish_opacity: 1,
+			trackcolor: function(d){return "#888888"},
+			track_opacity: 1,
+			sites: [],
+			flowlines: [],
+			flowtemp: false,
+			damflows: [],
+			flowscale: 1,
+			tempscale: d3.scale.threshold().domain([8,10,12,14,16,18,20]).range(["#0040ff","#0080ff","#00ffff","#40ff00","#ffff00","#ffbf00","#ff8000","#ff0000"]),
+			tempvariable: "TempTW",
+			gasvariable: "DgasTW"
+
+		}
+		if(opts){
+			Object.keys(opts).forEach(function(d){
+				options[d] = opts[d];
+			})
+		}
+		var fish, xAxis,yAxis, currentRange, initRange;
+
+		var margin = {top: 10, right: 36, bottom: 100, left: 160},
+			margin2 = {top: 730, right: 36, bottom: 30, left: 160},
+			width = 950 - margin.left - margin.right,
+			height = 800 - margin.top - margin.bottom,
+			height2 = 800 - margin2.top - margin2.bottom;	
+
+		d3.select("#chosen").remove();
+		d3.select("#tipdiv").style("opacity", 0);
+			
+		var svg = d3.select('#fishplot').append("svg")
+			.attr("id","chosen")
+			.attr("width", width + margin.left + margin.right)
+			.attr("height", height + margin.top + margin.bottom);
+			
+		svg.append("text")
+			.attr("class", "loading")
+			.text("Working ...")
+			.attr("x", function () { return width/2; })
+			.attr("y", function () { return height/2-5; });
+			
+		var inRange = function(d) { 
+			if(!currentRange || d.obs_date < currentRange[0] || d.obs_date > currentRange[1] ) {
+				//console.log("hidden");
+				return "hidden";
+			} else {
+				//console.log("visible");
+				return "visible";
+			}
+		}
+
+		var data;
+		
+		
+
+		if(options.sites.length>0){
+			data = [];
+			params.fishfilter.detectionsDim.top(Infinity).forEach(function(d){
+				var fish = {}
+				Object.keys(d).forEach(function(dd){
+					fish[dd] = d[dd]
+				})
+				fish.events = [];
+				d.events.forEach(function(dets){
+					if(options.sites.includes(dets.site))fish.detections.push(dets);
+				});
+				if(fish.events.length>0)data.push(fish)
+			})
+			_this.data = data
+		}
+		//include only fish with detections
+		else{
+			data = params.fishfilter.detectionsDim.top(Infinity).filter(function(d){return d3.sum(Object.keys(d.sites),dd => {return d.sites[dd].length}) > 0});
+			this.data = data
+		}	
+
+		var obs_sites=[],_obs_sites={};
+		var rel_sites=[],_rel_sites={};
+		var date_limits = params.fishfilter.dateLimits()
+		var min_date = date_limits.min_date;
+		var max_date = date_limits.max_date;
+		initRange = [min_date,max_date];
+
+		this.reset_basins()
+
+		data.forEach(function (d) {
+			if (!_rel_sites[d.rel_site]) 
+				{
+					_rel_sites[d.rel_site] = true; 
+					rel_sites.push(d.rel_site); 
+				}
+			filterEvents(d.events).forEach(function (dd) {
+				if(!_this.sites_basins[dd.site])console.log(dd)
+				_this.basins_sites[_this.sites_basins[dd.site]].active=true;
+				_this.basins_sites[_this.sites_basins[dd.site]].active_sites[_this.sites_index[dd.site]]=true;
+			});
+		});
+
+
+		currentRange = [min_date,max_date];
+		var damflowdata, damflowmax, flowdata;
+
+
+		var x = d3.time.scale().range([0, width]),
+			x2 = d3.time.scale().range([0, width]),
+			y = d3.scale.ordinal().rangeBands([0, height], 1),
+			y2 = d3.scale.ordinal().rangeBands([0, height2], 1)
+
+		var xAxis = d3.svg.axis().scale(x).orient("bottom")//.tickFormat(d3.time.format("%b %Y"));
+		var xAxis2 = d3.svg.axis().scale(x).orient("bottom");
+		var yAxis = d3.svg.axis().scale(y).orient("left");	
+
+		//x.domain(d3.extent(data.map(function(d) { return d.obs_date; })));
+		x.domain([min_date, max_date]);
+		y.domain(this.getDomain());
+		x2.domain(x.domain());
+		y2.domain(y.domain());
+		
+		params.x = x
+				
+
+			
+		var div = d3.select('#fishplot').append("div") // declare the properties for the div used for the tooltips
+		  .attr("class", "tooltip")       // apply the 'tooltip' class
+		  .style("opacity", 0);	
+
+		svg.append("defs").append("clipPath")
+			.attr("id", "clip")
+		  .append("rect")
+			.attr("width", width)
+			.attr("height", height);
+
+		var focus = svg.append("g")
+			.attr("class", "focus")
+			.attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+		var context = svg.append("g")
+			.attr("class", "context")
+			.attr("transform", "translate(" + margin2.left + "," + margin2.top + ")");
+			
+		var line = d3.svg.line()
+			.x(function (d) { 
+				//if(d.obs_date < currentRange[0])return currentRange[0];
+				return x(d.date);})
+			.y(function (d) {return y(_this.getBasinSite(d.site));})
+			.interpolate("linear");
+			
+			
+		var line2 = d3.svg.line()
+			
+			.x(function (d) {
+			return x2(d.date);})
+			.y(function (d) {
+			return y2(_this.getBasinSite(d.site));})
+			.interpolate("linear");
+
+		var line3 = d3.svg.line()
+			.x(function (d) { 
+				return d.x;})
+			.y(function (d) {return d.y;})
+			.interpolate("linear");
+			
+
+
+		var tdate1 = new Date();
+		var tdate2 = new Date();
+		tdate2.setDate(tdate2.getDate()+1)
+
+
+		var tipdiv = d3.select("body").append("div")   
+			.attr("class", "tooltip")               
+			.style("opacity", 0);
+			
+		var brush = d3.svg.brush()
+			.x(x2)
+			.on("brush", brushed);
+
+		var context = svg.append("g")
+			.attr("class", "context")
+			.attr("transform", "translate(" + margin2.left + "," + margin2.top + ")");
+			
+		context.append("g")
+			  .attr("class", "x axis")
+			  .attr("transform", "translate(0," + height2 + ")")
+			  .call(xAxis2);
+			   
+
+		context.append("g")
+			  .attr("class", "x brush")
+			  .call(brush)
+			  .selectAll("rect")
+			  .attr("y", -6)
+			  .attr("height", height2 + 7);	
+
+
+		focus.append("rect")  // Grid lines Background
+					.attr("x", 0)
+					.attr("y", 0)
+					.attr("height", height)
+					.attr("width", width)
+					.attr("fill", "#E6E6E6")
+					.style("opacity", "0.3");
+
+							
+		//plot flow bars
+		
+		//new brush*******************
+/*		
+		const brush2 = d3.brush().extent([[0, 0], [width, height]])
+		   .on("start", () => { brush_startEvent(); })
+		   .on("brush", () => { brush_brushEvent(); })
+		   .on("end", () => { brush_endEvent(); })
+		   .on("start.nokey", function() {
+			   d3.select(window).on("keydown.brush keyup.brush", null);
+		});
+
+		const brushSvg = focus
+		   .append("g")
+		   .attr("class", "brush")
+		   .call(brush);
+		
+*/		
+
+		var damflow = focus.append("g")
+				.attr("class","damflow")
+				
+		var spillflow = focus.append("g")
+				.attr("class","spillflow")		
+
+
+		getDamFlowData();
+		setDamFlow();	
+					
+		//plot flow lines
+
+		var flows = focus.append("g")
+			.attr("class","flows")
+
+
+		getFlowLineData();
+		setFlowLines();	
+					
+		var padding = width/(_this.basins.length + 1)/2;
+
+		var fish  = focus.selectAll(".fish")
+			.data(data)
+			.enter().append("g")
+			.attr("class",function(d){
+				return "fish " + "TAG" + d.tag_code.split(".")[1];
+			});
+			
+		var fish2  = context.selectAll(".fish")
+			.data(data)
+			.enter().append("g")
+			.attr("class", "fish");		
+
+		fish.append("path")
+			.attr("class", function (d) {
+			return "line " + "TAG"+ d.tag_code.split(".")[1];
+			})
+			.attr("d", function (d) {
+			return line3(trimDetections(filterEvents(d.events)));
+			})
+			.style("stroke", options.trackcolor)
+			.style("fill", "none")
+			.style("stroke-width", 1);	
+
+		fish2.append("path")
+			.attr("class", "line")
+			.attr("d", function (d) {
+			//console.log(d);
+			return line2(filterEvents(d.events));
+			})
+			.style("stroke", function (d) {
+			return getColor(d);
+			})
+			.style("fill", "none")
+			.style("stroke-width", 1);	
+
+		fish.append("g")
+				.attr("class", "dot")
+				.selectAll("circle")
+				.data(function(d) { return filterEvents(d.events); })
+				.enter().append("circle")
+				.attr("r", 3)
+				.attr("class", function (d) {
+					return addClass(d);
+				})
+				.attr("cx", function(d,i) {  return x(d.date); })
+				.attr("cy", function(d,i) { return y(_this.getBasinSite(d.site)); })
+				.style('fill', options.fishcolor);
+
+				
+
+		focus.append("g")
+			.attr("class", "x axis")
+			.attr("transform", "translate(0," + height + ")")
+			.call(xAxis);
+
+		focus.append("g")
+			.attr("class", "y axis")
+			.call(yAxis)
+			.append("text")
+			.attr("transform", "rotate(-90)")
+			.attr("y", 6)
+			.attr("dy", ".71em")
+			.style("text-anchor", "end");
+
+		var addtip = focus
+			.select(".y.axis")
+			.selectAll(".tick")
+			//console.log(addtip);
+			.on("mouseover", function(d) {
+				var text="";
+				var basin = _this.basins_sites[_this.basins_index[d]];
+				if(basin){
+					if(!basin.open)text="click to expand";
+					else text="click to collapse";
+				}
+				else{
+					var site = sites[d];
+					text = site.name + ' | rkm:' + site.rkm;
+				}
+				tipdiv.transition()        
+					.duration(20)      
+					.style("opacity", 1);      
+				tipdiv.html(text)  
+					.style("left", (d3.event.pageX + 20) + "px")     
+					.style("top", (d3.event.pageY - 14) + "px"); 	
+			})                  
+			.on("mouseout", function(d) {       
+					tipdiv.transition()        
+						.duration(20)      
+						.style("opacity", 0);   
+			})
+			.on("click", function(d){
+				var basin = _this.basins_sites[_this.basins_index[d]];
+				if(basin){
+					if(!basin.open)basin.open=true;
+					else basin.open=false;
+					y.domain(_this.getDomain());
+					addGrid(focus);
+					focus.selectAll(".fish").select(".line").attr("d", function (dd) {return line3(trimDetections(filterEvents(dd.events)));})
+					focus.selectAll("circle")
+						.attr("cx", function (dd) { return x(dd.date); })
+						.attr("cy", function (dd) { return y(_this.getBasinSite(dd.site)); })
+						.style("visibility", inRange)
+						.attr("class",addClass)
+						
+					focus.select(".y.axis").call(yAxis);				
+				}
+			});	
+
+		var addGrid = function(obj){	
+			obj.selectAll(".grid").remove();
+			obj.append("g")     // Draw the y Grid lines
+			.attr("class", "grid")
+			.call(make_y_axis()
+			  .tickSize(-width, 0, 0)
+			  .tickFormat("")
+			);	
+		}
+
+		addGrid(focus);
+
+		var countbox = [];
+		var fishbuffer;
+		focus.on("click", function(){
+			if(d3.mouse(this)[0]<0){
+				return;
+			}
+			if(countbox.length==0){
+				let start_coords = d3.mouse(this);
+				countbox.push(start_coords);
+				focus.on("mousemove",function(){
+					var current_coords = d3.mouse(this);
+					//console.log(current_coords[0] + "," + current_coords[1]);
+					var _x = Math.min(start_coords[0],current_coords[0]);
+					var _y = Math.min(start_coords[1],current_coords[1]);
+					focus.select("#testbox").remove()
+					focus.append('rect')
+							.attr('x', _x)
+							.attr('y', _y)
+							.attr('width', Math.abs(start_coords[0]-current_coords[0]))
+							.attr('height', Math.abs(start_coords[1]-current_coords[1]))
+							.attr('id', 'testbox')
+							.style('fill', "none")
+							.style("stroke", "black");					
+				})
+			}
+			else if (countbox.length==2){
+				countbox = [];
+				focus.on("mousemove",null)
+				svg.selectAll("#fishcounts").remove();
+				focus.selectAll("#countbox").remove();
+				focus.selectAll("#counttext").remove();
+				focus.selectAll("#counttext2").remove();
+				focus.selectAll("circle").style("opacity", options.fish_opacity);
+				focus.selectAll("path").style("opacity", options.track_opacity);
+				d3.select("#fishoptions").style("visibility","hidden");
+				_this.caughtfish = [];
+				params.fishfilter.clearSelectedData();
+			}
+			else{
+			countbox.push(d3.mouse(this))
+			focus.on("mousemove",null)
+			focus.select("#testbox").remove()
+			var _temp = focus.selectAll("circle").filter(function(d){ return d3.select(this).style('opacity') != 0 });
+			var temp = _temp.filter(function(d,i){
+				var da = d3.select(this);
+				var _x = da.attr("cx");
+				var _y = da.attr("cy");
+				if(_x >= Math.min(countbox[0][0],countbox[1][0]) & _y >= Math.min(countbox[0][1],countbox[1][1]) & _x <= Math.max(countbox[0][0],countbox[1][0]) & _y <= Math.max(countbox[0][1],countbox[1][1]))return true;
+		//		if(x(d.date1) >= Math.min(countbox[0][0],countbox[1][0]) & y(d.site2) >= Math.min(countbox[0][1],countbox[1][1]) & x(d.date1) <= Math.max(countbox[0][0],countbox[1][0]) & y(d.site2) <= Math.max(countbox[0][1],countbox[1][1]))return true;
+				return false;
+			});
+			//console.log(temp[0].length + " fish");
+			//console.log(temp[0][0]);
+			focus.selectAll("circle").style("opacity", 0);
+			focus.selectAll(".line").style("opacity", 0);
+			var fishes = {};
+			var events = [];
+			_this.caughtfish = [];	
+			temp[0].forEach(function (d) {
+				var att = d.getAttribute("class");
+				var i1 = att.indexOf("TAG");
+				var i2 = att.indexOf("SITE");
+				var site = att.substring(i2+4).replace(/-/g," ");
+				
+				att = att.substring(i1,i2); 
+				fishes[att]=1;
+				att = ".fish." + att;
+				var selected = focus.selectAll(att)
+					.style("opacity", 1)
+					.call(function(d){
+						this.selectAll("path").style("opacity",options.track_opacity);
+						var circles = this.select("g")
+						.selectAll("circle")
+						.style("opacity",options.fish_opacity)	
+					});
+				var sd = selected.datum();
+				//console.log(sd)
+				_this.caughtfish.push(sd);
+				filterEvents(sd.events).forEach(function(d){if(_this.getBasinSite(d.site)==site)events.push(d)});
+			});
+			var nfish = Object.keys(fishes).length;
+			var ndetect = temp[0].length;
+			countBox(nfish,ndetect);
+			countFish();
+			//sizeFish(detections);	
+			}
+			params.fishfilter.setSelectedData(_this.caughtfish)
+		});
+
+
+
+
+		focus
+			.selectAll(".fish")
+			.select(".line")
+			.on("mouseover", function(d) {
+				d3.select(this).moveToFront().style("stroke-width", "3px")
+				})                  
+			.on("mouseout", function(d) {       
+				d3.select(this).style("stroke-width", "1px")   
+			});
+
+		focus
+			.selectAll(".fish")
+			.select(".dot")
+			.selectAll("circle")
+			.on("mouseover", function(d) {
+					var site = {date: dateFormat1(d.date),temp: d.temperature};
+					tipdiv.transition()        
+						.duration(20)      
+						.style("opacity", 1);      
+					tipdiv.html('<b>' + d.type + ' at: ' + d.site + " on: " + site.date + '<br><b>Released: ' + d.getFish().rel_site + '</b> on ' + dateFormat1(d.getFish().rel_date) + '<br><b>Tag:</b> ' + d.getFish().tag_code)  
+						.style("left", (d3.event.pageX + 20) + "px")     
+						.style("top", (d3.event.pageY - 14) + "px");    
+					})                  
+				.on("mouseout", function(d) {       
+					tipdiv.transition()        
+						.duration(20)      
+						.style("opacity", 0);   
+				});	
+			
+			svg.selectAll(".loading").remove();
+			
+		return({
+			updateFishColor: updateFishColor, 
+			updateFlowScale: updateFlowScale, 
+			updateDamFlow: updateDamFlow, 
+			updateFlowLines: updateFlowLines,
+			updateFishOpacity: updateFishOpacity,
+			updateTrackOpacity: updateTrackOpacity
+			})
+
+	}
+	
+	checkSites(writeSites){
+		var _this = this
+		var allsites = []
+		Object.keys(params.sitemap).forEach(function(d){
+			try{
+				var basin = _this.getBasinSite(d);
+				params.sitemap[d].valid = true;
+				params.sitemap[d].basin = basin;
+			}
+			catch(err){
+			console.log(d)
+				params.sitemap[d].valid=false
+				params.sitemap[d].basin = "Unknown";
+			}
+			allsites.push(params.sitemap[d])
+		})
+		if(writeSites){
+		
+		//using R to view
+		//read.csv("checksites.csv") %>% arrange(desc(rkm)) %>% View()
+		
+			var headers = Object.keys(allsites[0])
+			headers.splice(6,1)//remove locations
+			//downloadCSV(allsites,headers,"Site_export.csv")
+			new CSV({headers: headers, data: allsites, filename: "checksites"})
+				.encodeCSV().exportCSV()
+		}
+	}
+}
+
+class EventFilter{
+	constructor(options){
+		let _this = this;
+		this.sitemap = options.sitemap ? options.sitemap : params.sitemap;
+		this.onChangeFxns = []//functions to call when input data changes
+		this.event_options_class = options.event_options_class ? options.event_options_class : "event_filter_option";
+		
+		this.event_type = {
+			Observation: true,
+			Mark: false,
+			Release: true,
+			Recapture: true,
+			Recovery: true,
+			"Passive Recovery": true
+		}
+
+		d3.selectAll(".pie_mode")
+			.on("change",function(){
+				let mode = this.value		
+				_this.setMeasureMode(mode)
+				_this.updateCharts()
+			})
+		$( "#pie_event_variable")
+			.on("change",function(){
+				params.pielayer.categoryField = document.getElementById("pie_event_variable").options[document.getElementById("pie_event_variable").selectedIndex].value;
+				params.pielayer.update()
+			});	
+		$( "#pie_enviro_variable").attr("disabled", true)
+			.on("change",function(){
+				params.pielayer.categoryField = document.getElementById("pie_enviro_variable").options[document.getElementById("pie_enviro_variable").selectedIndex].value;
+				params.enviroevent.variable = params.pielayer.categoryField
+				params.pielayer.colormaps[params.pielayer.categoryField] = params.enviroevent.getColorMap(params.pielayer.categoryField)
+				params.eventfilter.updateCharts()
+			});			
+	}
+	
+	
+	dateLimits(){
+		var min_date = d3.min(this.events,d => {return d.date});
+		var max_date = d3.max(this.events,d => {return d.date});
+		return [min_date, max_date];
+	}
+	
+	updateCharts(){
+		console.log("updating charts: " + this.filteredData().length + " data rows")
+		this.onChangeFxns.forEach(fxn => {fxn()})
+	}
+	
+	setMeasureMode(mode){
+		let _this = this;
+		if(mode == "measure"){
+			this.filters.event_type.filterAll()
+			this.filters.event_type.filter("Measure")
+			
+			$( "input.event_filter_option").attr("disabled", true);
+			$( "#pie_event_variable").attr("disabled", true);
+			$( "#pie_enviro_variable").attr("disabled", false);
+			params.pielayer.categoryField = document.getElementById("pie_enviro_variable").options[document.getElementById("pie_enviro_variable").selectedIndex].value;
+			params.enviroevent.variable = params.pielayer.categoryField
+			params.pielayer.colormaps[params.pielayer.categoryField] = params.enviroevent.getColorMap(params.pielayer.categoryField)			
+		}
+		else{
+			this.filters.event_type.filterAll()
+			Object.keys(this.event_type).forEach(d => {
+				if(_this.event_type[d])_this.filters.event_type.filter(d)
+			})
+			$( "input.event_filter_option").attr("disabled", false);
+			$( "#pie_event_variable").attr("disabled", false);
+			$( "#pie_enviro_variable").attr("disabled", true);
+			params.pielayer.categoryField = document.getElementById("pie_event_variable").options[document.getElementById("pie_event_variable").selectedIndex].value;				
+		}
+	}
+	
+	filter(data){
+		let _this = this;
+		if(data){
+			return data.filter(d => {return d.date >= _this.min_date & d.date <= _this.max_date})
+		}
+		else return null
+	}
+	
+	setData(data){
+		let _this = this;
+		this.fish = data;
+		this.events = [];
+		this.fish.forEach(function(fish){
+			var first = false;
+			fish.events.forEach(function(event,i){
+				let evnt = {
+				}
+				Object.keys(fish).forEach(function(d){
+					if(!Array.isArray(fish[d]))evnt[d] = fish[d]
+				})
+				Object.keys(event).forEach(function(d){
+					if(!Array.isArray(event[d]) | d == "edata")evnt[d] = event[d]
+				})				
+				evnt.latitude = _this.sitemap[event.site].latitude;
+				evnt.longitude = _this.sitemap[event.site].longitude;
+				evnt.site_basin = params.hucnames[params.sitemap[evnt.site].basin_code] ?  params.hucnames[params.sitemap[evnt.site].basin_code].name : "Unknown";
+				evnt.release_basin = params.hucnames[params.sitemap[evnt.rel_site].basin_code] ?  params.hucnames[params.sitemap[evnt.rel_site].basin_code].name : "Unknown";
+				evnt.basin_status = evnt.site_basin == evnt.release_basin ? true : false;
+				evnt.basin_status = evnt.site_basin == "Unknown" ? false : evnt.basin_status;
+				if(!first & evnt.type == "Observation")first = true;
+				else first = false;
+				evnt.event_order = first ? "first" : i==fish.events.length-1 ? "last" : "inner";
+				_this.events.push(evnt);
+				if(event.edata){
+					let eevents = params.enviroevent.getEvents(event)
+					eevents.forEach(ee => {_this.events.push(ee)})
+				}
+			})
+		})	
+		let datelimits = this.dateLimits()
+		this.min_date = datelimits[0]
+		this.max_date = datelimits[1]
+		$("#event_date_slider").slider({
+			range: true,
+			min: new Date(datelimits[0]).getTime() / 1000,
+			max: new Date(datelimits[1]).getTime() / 1000,
+			step: 86400,
+			values: [datelimits[0].getTime() / 1000, datelimits[1].getTime() / 1000],
+			slide: function (event, ui) {
+				d3.select("#event_dates").html((new Date(ui.values[0] * 1000).toDateString()) + " - " + (new Date(ui.values[1] * 1000)).toDateString())
+			},
+			stop: function (event, ui) {
+				_this.min_date = new Date(ui.values[0] * 1000);
+				_this.max_date = new Date(ui.values[1] * 1000);
+				console.log((new Date(ui.values[0] * 1000).toDateString()) + " - " + (new Date(ui.values[1] * 1000)).toDateString());
+				_this.filters.event_date.filter(null)
+				_this.filters.event_date.filter(dc.filters.RangedFilter(_this.min_date,_this.max_date))
+				_this.updateCharts()
+			}
+		});
+		d3.select("#event_dates").html(datelimits[0].toDateString() + " - " + datelimits[1].toDateString())
+		
+		this.ndx = crossfilter(this.events);
+		this.all = this.ndx.groupAll();
+		dc.dataCount("#dc-event-count")
+			.dimension(this.ndx)
+			.group(this.all)
+
+		var filters = {
+			event_type: dc.rowChart("#chart-event_type","eventfilter"),
+			site_type: dc.rowChart("#chart-site_type","eventfilter"),
+			event_date: dc.barChart("#chart-event_date","eventfilter"),
+			event_order: dc.rowChart("#chart-event_order","eventfilter"),
+			basin_status: dc.rowChart("#chart-basin_status","eventfilter")
+		};
+
+		
+		this.filters = filters;
+		
+		this.siteDim = this.ndx.dimension(function(d) {return d.site;})	
+		
+		filters.event_date
+			.width(300)
+			.height(100)
+			.transitionDuration(200)
+			.brushOn(true)
+			.dimension(this.ndx.dimension(function(d) {return _this.floorDate(d.date);}))
+			.group(filters.event_date.dimension().group()) 
+			.elasticY(true)
+			.renderHorizontalGridLines(false)
+			.renderVerticalGridLines(false)
+			.x(d3.time.scale().domain(this.dateLimits()))
+			.yAxis().tickFormat(d3.format("s"));
+
+		filters.event_type
+			.width(200)
+			.height(100)
+			.margins({top: 0, left: 5, right: 0, bottom: 20})
+			.dimension(this.ndx.dimension(function(d) {return d.type}))
+			.group(filters.event_type.dimension().group())
+			.elasticX(true)
+			.transitionDuration(100)
+
+		filters.site_type
+			.width(200)
+			.height(100)
+			.margins({top: 0, left: 5, right: 0, bottom: 20})
+			.dimension(this.ndx.dimension(function(d) {
+					if(d.type == "Measure")return "Measurement";
+					else return _this.sitemap[d.site].type
+				}))
+			.group(filters.site_type.dimension().group())
+			.elasticX(true)
+			.transitionDuration(100)			
+
+		filters.event_order
+			.width(200)
+			.height(100)
+			.margins({top: 0, left: 5, right: 0, bottom: 20})
+			.dimension(this.ndx.dimension(function(d) {return d.event_order}))
+			.group(filters.event_order.dimension().group())
+			.elasticX(true)
+			.transitionDuration(100)
+
+		filters.basin_status
+			.width(200)
+			.height(100)
+			.margins({top: 0, left: 5, right: 0, bottom: 20})
+			.dimension(this.ndx.dimension(function(d) {return d.basin_status}))
+			.group(filters.basin_status.dimension().group())
+			.elasticX(true)
+			.transitionDuration(100)
+
+		Object.keys(this.event_type).forEach(d => {
+		if(_this.event_type[d])_this.filters.event_type.filter(d)})			
+			
+		this.updateCharts()	
+		return this;
+	}
+	
+	init(){
+		console.log("init called")
+		let _this = this
+		//dc.renderAll("eventfilter")
+		//d3.selectAll(".dc-chart g.row text").style("fill","black");
+		d3.selectAll("." + this.event_options_class)
+			.on("click",function(){
+				console.log(this.name + " " + this.value + " " + this.checked)
+				_this[this.name][this.value] = this.checked
+				_this.filters[this.name].filterAll();
+				Object.keys(_this[this.name]).forEach(d => {
+				if(_this[this.name][d])_this.filters[this.name].filter(d)})	
+				_this.updateCharts()
+			})
+		return this;
+	}
+	
+	filtersApplied(){
+		let filterarray = [];
+		let filters = this.filters
+		let multiple = {
+			dsites: true,
+			dbasin: true,
+			dsubbasin: true
+		};
+		Object.keys(filters).forEach(function(d){
+			if(filters[d].filters().length > 0)filterarray.push({name: d, filters: filters[d].filters(), multiple_allowed: multiple[d] ? true : false})
+		})
+		return filterarray
+	}
+	
+	filteredData(){
+		return this.siteDim.top(Infinity)
+	}
+	
+	reset(filtername){
+		this.filters[filtername].filterAll();
+		dc.redrawAll("eventfilter");
+		return this;
+	}	
+	
+	floorDate(_date){
+		var date = new Date(_date);
+		date.setHours(0);
+		date.setMinutes(0);
+		date.setSeconds(0);
+		date.setMilliseconds(0);
+		return date;	
+	}
+}
+
+class FishFilter{
+	constructor(options){
+		if (!options.fishfarm) {
+			console.log(options)
+			return null;
+		}
+		let _this = this;
+		this.onChangeFxns = []//functions to call when filters change
+		this.fishfarm = options.fishfarm
+		
+		
+		let ndx = crossfilter(this.fishfarm.fisharray);
+			
+		this.ndx = ndx;	
+		
+		let all = this.ndx.groupAll();
+		this.all = all;
+
+		dc.dataCount("#dc-data-count")
+			.dimension(this.ndx)
+			.group(this.all)
+			
+		var minlength = d3.min(_this.fishfarm.fisharray,function(d){if(!d.length)return 1000;else return d.length});
+		var maxlength = d3.max(_this.fishfarm.fisharray,function(d){if(!d.length)return 0;else return d.length})
+		maxlength = maxlength > 200 ? 200 : maxlength;			
+			
+		let filters = {
+			species: dc.pieChart("#pie-species"),
+			run: dc.pieChart("#pie-run"),
+			rtype: dc.pieChart("#pie-rtype"),
+			basin: dc.pieChart("#chart-basin"),
+			subbasin: dc.pieChart("#pie-subbasin"),
+			relsite: dc.pieChart("#pie-rel_site"),
+			year: dc.pieChart("#pie-year"),
+			dbasin: dc.pieChart("#pie-dbasin"),
+			dsubbasin: dc.pieChart("#pie-dsubbasin"),
+			dsites: dc.pieChart("#pie-dsites"),
+			//lastsite: dc.pieChart("#pie-lastsite"),
+			transport: dc.pieChart("#pie-transport"),
+			
+		};
+		
+		if(maxlength>0)filters.flength = dc.barChart("#chart-flength")
+		
+		this.filters = filters;
+		
+		this.detectionsDim = ndx.dimension(function(d) {return d.events;})
+		this.mindateDim = ndx.dimension(function(d) {return d.events[0].date;})
+		this.maxdateDim = ndx.dimension(function(d) {return d.events[d.events.length-1].date;})	
+
+		filters.species
+			.width(350)
+			.height(150)
+			.radius(70)
+			.cx(70)
+			.cy(80)	
+			.dimension(ndx.dimension(function(d) {return d.species;}))
+			.group(filters.species.dimension().group())
+			.legend(dc.legend().x(150).y(10).itemHeight(13).gap(5));
+		console.log("species")
+		
+		filters.basin
+			.width(350)
+			.height(200)
+			.radius(70)
+			.cx(70)
+			.cy(80)
+			.dimension(ndx.dimension(function(d) {
+				if(!params.sitemap[d.rel_site])console.log(d)
+				if(params.hucnames[params.sitemap[d.rel_site].basin_code])return params.hucnames[params.sitemap[d.rel_site].basin_code].name;
+				else return "Unknown";
+			}))
+			.group(filters.basin.dimension().group())
+			.legend(dc.legend().x(150).y(10).itemHeight(13).gap(5));
+		console.log("basin")
+	
+		filters.subbasin
+			.data(function(group){
+				return group.all().filter(function(kv) {
+					return kv.value>0; 
+				})
+			})
+			.width(350)
+			.height(200)
+			.radius(70)
+			.cx(70)
+			.cy(80)
+			.dimension(ndx.dimension(function(d) {
+					if(params.hucnames[params.sitemap[d.rel_site].subbasin_code])return params.hucnames[params.sitemap[d.rel_site].subbasin_code].name;
+					else return "Unknown"
+				}))
+			.group(filters.subbasin.dimension().group())
+			.renderLabel(false)
+			.legend(dc.legend().x(160).y(10).itemHeight(13).gap(5));
+		console.log("subbasin")
+								
+		filters.relsite
+			.data(function(group){
+				return group.all().filter(function(kv) {
+					return kv.value>0; 
+				})
+			})
+			.width(350)
+			.height(200)
+			.radius(70)
+			.cx(70)
+			.cy(80)
+			.dimension(ndx.dimension(function(d) {return d.rel_site;}))
+			.group(filters.relsite.dimension().group())
+			.renderLabel(false)
+			.legend(dc.legend().x(160).y(10).itemHeight(13).gap(5));
+		console.log("relsite")
+		
+		filters.year
+			.width(350)
+			.height(150)
+			.radius(70)
+			.cx(70)
+			.cy(80)	
+			.dimension(ndx.dimension(function(d) {return d.rel_date.getFullYear();}))
+			.group(filters.year.dimension().group())
+			.legend(dc.legend().x(150).y(10).itemHeight(13).gap(5))
+			.on("postRedraw",function(d){
+				_this.onChangeFxns.forEach(function(dd){
+					dd();
+				})
+				//params.fishtracks.doTracks()
+			})
+		console.log("year")
+	
+		filters.rtype
+			.width(350)
+			.height(150)
+			.radius(70)
+			.cx(70)
+			.cy(80)	
+			.dimension(ndx.dimension(function(d) {return d.rtype;}))
+			.group(filters.rtype.dimension().group())
+			.legend(dc.legend().x(150).y(10).itemHeight(13).gap(5));
+		console.log("rtype")
+		
+		filters.run
+			.width(350)
+			.height(150)
+			.radius(70)
+			.cx(70)
+			.cy(80)	
+			.dimension(ndx.dimension(function(d) {return d.run_name;}))
+			.group(filters.run.dimension().group())
+			.legend(dc.legend().x(150).y(10).itemHeight(13).gap(5));
+		console.log("run")
+		
+		if(maxlength>0){
+			filters.flength
+				.width(350)
+				.height(150)
+				.margins({top: 10, right: 40, bottom: 30, left: 20})
+				.y(d3.scale.linear())
+				.elasticY(true)
+				.x(d3.scale.linear().domain([minlength,maxlength]))
+				.dimension(ndx.dimension(function(d) {
+					if(!d.length)return 0;
+					else return d.length;}))
+				.group(filters.flength.dimension().group())
+			console.log("length")
+		}
+		
+		filters.transport
+			.width(350)
+			.height(150)
+			.radius(70)
+			.cx(70)
+			.cy(80)	
+			.dimension(ndx.dimension(function(d) {
+				if(d.transported)return d.transported;
+				else return false;}))
+			.group(filters.transport.dimension().group())
+			.legend(dc.legend().x(150).y(10).itemHeight(13).gap(5));
+		console.log("transport")
+		
+		filters.dbasin
+			.data(function(group){
+				return group.all().filter(function(kv) {
+					return kv.value>0; 
+				})
+			})
+			.width(350)
+			.height(150)
+			.radius(70)
+			.cx(70)
+			.cy(80)
+			.dimension(ndx.dimension(function(d) {
+				let basins = []
+				d.sites.Observation.forEach(function(dd){
+					if(!params.sitemap[dd])console.log(dd)
+					basins.push(params.hucnames[params.sitemap[dd].basin_code].name)
+				})
+				return uniq(basins);
+			},true))
+			.group(filters.dbasin.dimension().group())
+			.legend(dc.legend().x(160).y(10).itemHeight(13).gap(5));
+		console.log("dbasin")
+
+		filters.dsubbasin
+			.data(function(group){
+				return group.all().filter(function(kv) {
+					return kv.value>0; 
+				})
+			})
+			.width(350)
+			.height(150)
+			.radius(70)
+			.cx(70)
+			.cy(80)
+			.dimension(ndx.dimension(function(d) {
+				let subbasins = []
+				d.sites.Observation.forEach(function(dd){
+					subbasins.push(params.hucnames[params.sitemap[dd].subbasin_code].name)
+				})
+				return uniq(subbasins);
+			},true))
+			.group(filters.dsubbasin.dimension().group())
+			.legend(dc.legend().x(160).y(10).itemHeight(13).gap(5));
+		console.log("dsubbasin")		
+
+		filters.dsites
+			.data(function(group){
+				return group.all().filter(function(kv) {
+					return kv.value>0; 
+				})
+			})
+			.width(350)
+			.height(150)
+			.radius(70)
+			.cx(70)
+			.cy(80)
+			.dimension(ndx.dimension(function(d) {
+				let sites = []
+				d.sites.Observation.forEach(function(dd){
+					sites.push(dd)
+				})
+				return uniq(sites);
+			},true))
+			.group(filters.dsites.dimension().group())
+			.legend(dc.legend().x(160).y(10).itemHeight(13).gap(5));
+		console.log("dsites")
+		
+		//for data selected by e.g. fishtracks or data table
+		this.selected = []
+		this.addedfilters = []
+		d3.select("#newfilterbutton")
+			.on("click", this.addFilter.bind(this))
+	}
+	
+	setSelectedData(data){
+		this.selected = data
+	}
+	
+	clearSelectedData(){
+		this.selected = []
+	}
+	
+	updateCharts(){
+		this.onChangeFxns.forEach(d => {d()})
+	}
+	
+	filtersApplied(){
+		let filterarray = [];
+		let filters = this.filters
+		let multiple = {
+			dsites: true,
+			dbasin: true,
+			dsubbasin: true
+		};
+		Object.keys(filters).forEach(function(d){
+			if(filters[d].filters().length > 0)filterarray.push({name: d, filters: filters[d].filters(), multiple_allowed: multiple[d] ? true : false})
+		})
+		return filterarray
+	}
+	
+	filteredData(){
+		return this.detectionsDim.top(Infinity)
+	}
+	
+	dateLimits(){
+		var min_date = this.mindateDim.bottom(1)[0].events[0].date;
+		var max_date = this.maxdateDim.top(1)[0].events[this.maxdateDim.top(1)[0].events.length-1].date;
+		//min_date = dateFormat1.parse(dateFormat1(min_date));
+		//max_date = dateFormat1.parse(dateFormat1(max_date));
+
+		min_date.setTime( min_date.getTime() - 5 * 86400000 );
+		max_date.setTime( max_date.getTime() + 5 * 86400000 );
+		return {min_date: min_date, max_date: max_date}
+	}
+	
+	init(){
+		dc.renderAll()
+		d3.selectAll(".dc-chart g.row text").style("fill","black");
+	}
+	
+	reset(filtername){
+		this.filters[filtername].filterAll();
+		dc.redrawAll();
+	}
+	
+	getObservationSites(){
+		let sites = []
+		params.fishfilter.filters.dsites.group().all().forEach(function(d){
+			sites.push(d.key);
+		})
+		return sites;
+	}
+	
+	saveCSV(){
+		var rows = []
+		var headers = []
+		//loop through fish and detections
+	
+	}
+	
+	addFilter(){
+		let _this = this
+		if(this.selected.length>0){
+			var filtername = "var" + this.addedfilters.length;
+			var filterlabel = document.getElementById("filterlabel").value;
+			var newdiv = d3.select("#filter4").append("div").attr("id","pie-" + filtername)
+			newdiv.append("div").append("strong").html(filterlabel)
+			var reset = newdiv.append("a")
+				.attr("class","reset")
+				.style("display","none")
+			var newfilter = dc.pieChart("#pie-" + filtername)
+			this.filters[filterlabel] = newfilter
+			this.addedfilters.push({label: filterlabel, filter: newfilter});
+			this.ndx.all().forEach(function(d){d[filtername]=false})
+			this.selected.forEach(function(d){d[filtername]=true})
+			var dim = this.ndx.dimension(function(d) {return d[filtername];});
+			newfilter
+				.width(350)
+				.height(175)
+				.radius(70)
+				.cx(70)
+				.cy(80)	
+				.dimension(dim)
+				.group(dim.group())
+				.label(function (d) {
+					if (newfilter.hasFilter() && !newfilter.hasFilter(d.key)) {
+						return d.key + '(0%)';
+					}
+					var label = d.key;
+					if (_this.all.value()) {
+						label += ' (' + Math.floor(d.value / _this.all.value() * 100) + '%)';
+					}
+					return label;
+				})			
+				.legend(dc.legend().x(150).y(10).itemHeight(13).gap(5))			
+				
+			reset.on("click",function(){
+				newfilter.filterAll();
+				dc.redrawAll();
+			})
+			newfilter.render();
+			document.getElementById("filterlabel").value = ""
+		}
+	} 	
+
+}
+
+class EnviroData{
+	constructor(options){
+		this.data = {daily: {}, hourly: {}}
+		this.sitemap = options.sitemap;
+	}
+	
+	setFishArray(fisharray){
+		this.fisharray = fisharray;
+	}
+	
+	fetchData(timespan){
+		params.promises = [];
+		params.progressbar.init()
+		let _this = this;
+		let siteyears = {}
+		function setSiteYears(){
+			_this.fisharray.forEach(function(d){
+				d.events.filter(function(e){return e.type == "Observation"})
+					.forEach(function(dd){
+						if(_this.sitemap[dd.site].envirosites.length > 0){
+							var year = dd.date.getFullYear()
+							_this.sitemap[dd.site].envirosites.forEach(function(ddd){
+								//if(!siteyears[ddd])siteyears[ddd] = []
+								//if(!siteyears[ddd][year])siteyears[ddd][year] = [];
+								var esite = JSON.parse(JSON.stringify(ddd))
+								esite.year = year;
+								siteyears[JSON.stringify(esite)] = esite
+							})
+						}
+					})
+			})
+		}
+		
+		function getDailyData(project,location,source,year,resolve){
+			var url = "https://www.cbr.washington.edu/dart/cs/php/rpt/river_daily.php?sc=1&outputFormat=csv&year=" + year + "&proj=" + project + "&span=no&startdate=1%2F1&enddate=12%2F31"; 
+			params.check[url] = false
+			d3.xhr(url).get(function (err, response) {
+				var dirtyCSV = response.responseText;
+				var firstEOL = dirtyCSV.indexOf('\n');
+				var parsedCSV = d3.csv.parse(dirtyCSV);
+				parsedCSV.forEach(function(d){
+					//if(!_this.data.daily[d.Date])_this.data.daily[d.Date] = {}
+					//_this.data.daily[d.Date][d.Project] = d
+					_this.data.daily[d.Project + ":" + d.Date] = d
+					d.Location = location
+					d.Source = source;
+					d.Freq = "daily";
+				});
+				//console.log(url)
+				params.check[url] = true
+				params.progressbar.updateProgress(completedcalls++,ncalls,"fetching attributes")
+				resolve(true)
+			});
+		};
+
+		function getHourlyData(project,location,source,year,resolve){
+			var url = "https://www.cbr.washington.edu/dart/cs/php/rpt/wqm_hourly.php?sc=1&outputFormat=csv&year=" + year + "&proj=" + project + "&startdate=01%2F01&days=365"; 
+			params.check[url] = false
+			d3.xhr(url).get(function (err, response) {
+				var dirtyCSV = response.responseText;
+				var firstEOL = dirtyCSV.indexOf('\n');
+				var parsedCSV = d3.csv.parse(dirtyCSV);
+				//console.log(parsedCSV.length + " count from " + url)
+				//console.log(parsedCSV)
+				parsedCSV.forEach(function(d){
+					//if(!_this.data.daily[d.Date])_this.data.daily[d.Date] = {}
+					//_this.data.daily[d.Date][d.Project] = d
+					_this.data.hourly[d.Project + ":" + d.Date + ":" + d.Hour] = d
+					d.Location = location
+					d.Source = source;
+					d.Freq = "hourly";
+				});
+				params.check[url] = true
+				params.progressbar.updateProgress(completedcalls++,ncalls,"fetching attributes")
+				resolve(true)
+			});
+		};		
+		
+		setSiteYears();
+		console.log(siteyears)
+		var ncalls = Object.keys(siteyears).length*2;
+		var completedcalls = 0
+		params.check = {}
+		
+		d3.select("#spinner").style('visibility','visible');
+		params.promises = []
+		Object.keys(siteyears).forEach(function(d){
+			let siteyear = siteyears[d]
+			params.promises.push(new Promise(function(resolve, reject) {
+				getDailyData(siteyear.sitecode,siteyear.location,siteyear.datasource,siteyear.year,resolve)
+			}))
+			params.promises.push(new Promise(function(resolve, reject) {
+				getHourlyData(siteyear.sitecode,siteyear.location,siteyear.datasource,siteyear.year,resolve)
+			}))				
+		})
+		
+		params.handlers.process_attrs()
+		
+		d3.select("#spinner").style('visibility','hidden');		
+	}
+	
+
+	
+	assignEnviroData(){
+		let _this = this;
+		function getEnviroData(event){
+			var sitedate;
+			let site = event.site;
+			let date = d3.time.format("%Y-%m-%d")(event.date)
+			var edata = []
+			let smap = _this.sitemap[site];
+			smap.envirosites.forEach(function(d){
+				let hour = 100*(event.date.getHours()+1)
+				sitedate = d.sitecode + ":" + date + ":" + hour;
+				if(_this.data.hourly[sitedate])edata.push(_this.data.hourly[sitedate])
+				sitedate = d.sitecode + ":" + date;
+				if(_this.data.daily[sitedate])edata.push(_this.data.daily[sitedate])
+			})
+			return edata;
+		}
+
+		//set enviro data for all events
+		let acount = 0, ecount = 0
+		this.fisharray.forEach(function(fish){
+			fish.events.forEach(function(event){
+				event.edata = getEnviroData(event)
+				if(event.edata.length > 0)acount++
+				ecount++
+			})
+		})
+		console.log("Added attributes for " + acount + " of " + ecount +  " events")
+	}
+	
+}
+
+class FishFarm{
+	constructor(){
+		this.purge_level = "site";
+		this.remove_zeroevents = true;
+		this.purge_time = 120//max time in minutes
+		this.fishes = {}
+		this.datasets = []
+		this.fisharray = []
+		this.rear_types = {
+			"Hatchery Reared": "H","Unknown": "U","Wild Fish or Natural Production": "W"
+		}
+		
+		this.runs = ["N/A","Spring","Summer","Fall","Unknown"]
+		
+		this.species = {
+			"": "Unknown","0": "Unknown","1": "Chinook","2": "Coho","3": "Steelhead","4": "Sockeye","5": "Chum","6": "Pink","7": "Bull Trout","8": "Cutthroat Trout","9": "Other","A": "Pacific Lamprey","B": "White Sturgeon","C": "Green Sturgeon","D": "Northern Pikeminnow","E": "Brook Trout","F": "American Shad","G": "Mountain Whitefish","H": "Walleye","I": "Channel Catfish","J": "Smallmouth Bass","K": "Western Brook Lamprey","L": "Lamprey (species unknown","U": ""
+		}
+	}
+
+	fileCountText(){
+		let count = this.datasets.length;
+		return count==1 ? "1 PTAGIS file" : count + " PTAGIS files";
+	}
+
+	
+	addData(ptagis){
+		this.datasets.push(ptagis)
+	}
+	
+	getMetadata(){
+		let metadata = {
+			purge_level: this.purge_level,
+			max_time_minutes: this.purge_time,
+			datasets: [],
+			created: new Date()
+		}
+		this.datasets.forEach(function(d){
+			metadata.datasets.push({
+				saved_filename: d.file.name,
+				lastModifiedDate: d.file.lastModifiedDate,
+				file_size_bytes: d.file.size,
+				file_type: d.file.type,
+				PTAGIS_filter: d.filter,
+				PTAGIS_report_type: d.report_type,
+				title: d.title
+			})
+		})
+		return metadata;
+	}
+	
+	addFish(pdata){
+		console.log(pdata)
+		var _this = this;
+		var fishes = this.fishes
+		var fisharray = [];
+		var PTAGIS_vars = pdata.PTAGIS_vars
+		console.log(this)
+		this.datasets.push(pdata)
+		
+		function processReleaseDate(fish,d){
+			//release date
+			if(d.release_date_mmddyyyy)fish.rel_date = d.release_date_mmddyyyy;
+			else if(d.event_type_name == "Mark"){
+				if(d.event_release_date_time_value)fish.rel_date = d.event_release_date_time_value;
+				else if(d.event_release_date_mmddyyyy)fish.rel_date = d.event_release_date_mmddyyyy
+			}
+		}
+		
+		function processReleaseSite(fish,d){			
+			//release site
+			if(d.release_site_code_value)fish.rel_site = d.release_site_code_value;
+			else if(d.release_site_name)fish.rel_site = d.release_site_name.split(" - ")[0]
+			else if (d.event_type_name == "Mark"){
+				if(d.event_release_site_code)fish.rel_site = d.event_release_site_code;
+				else if(d.event_release_site_name)fish.rel_site = d.event_release_site_name.split(" - ")[0];
+			}
+		}		
+		
+		function hatchFish(d){
+			var fish = {tag_code: d.tag_code, events: []}
+			_this.fisharray.push(fish);
+			switch (pdata.report_type) {
+			  case 'Interrogation Detail':
+				break;				  
+			  case 'Interrogation Summary':
+				break;
+			  case 'Tagging Detail':
+
+				break;
+			  case 'Recapture Detail':
+
+				break;
+			  case 'Mortality Detail':
+	
+				break;				
+			  default://Complete Tag History
+				//species
+				if(d.mark_species_name)fish.species = d.mark_species_name;
+				else if(d.event_species_name)fish.species = d.event_species_name;
+				else if(d.event_species_code)fish.species = _this.species[d.event_species_code];
+				else fish.species = "Unknown"
+				//run
+				if(d.mark_run_name)fish.run_name = d.mark_run_name;
+				else if(d.event_run_name)fish.run =  d.event_run_name;
+				else if(d.event_run_code)fish.run =  _this.runs[+d.event_run_code]
+				else fish.run = "Unknown";
+				//rear type
+				if(d.mark_rear_type_name)fish.rtype = _this.rear_types[d.mark_rear_type_name];
+				else if (d.event_rear_type_code)fish.rtype = d.event_rear_type_code;
+				else if(d.event_rear_type_name)fish.rtype = _this.rear_types[d.event_rear_type_name];
+				else fish.rtype = "U";
+				
+				processReleaseDate(fish,d)
+				processReleaseSite(fish,d)
+			}
+	
+			//loop through variables, adding those at fish level
+			/*
+			Object.keys(PTAGIS_vars).forEach(function(pvar){
+				if(PTAGIS_vars[pvar].Level == "fish")fish[pvar] = d[pvar]
+			})
+			*/
+			fish.data = function(){return pdata.data.filter(function(dd){return dd.tag_code == d.tag_code})};
+			return fish;			
+		
+		}
+		pdata.data.forEach(function(d){
+			if(!fishes[d.tag_code])fishes[d.tag_code] = hatchFish(d)
+			var fish = fishes[d.tag_code]
+			
+			switch (pdata.report_type) {
+			  case 'Interrogation Detail':
+				break;				  
+			  case 'Interrogation Summary':
+				break;
+			  case 'Tagging Detail':
+
+				break;
+			  case 'Recapture Detail':
+
+				break;
+			  case 'Mortality Detail':
+	
+				break;				
+			  default://Complete Tag History
+				if(!fish.release_date & d.event_type_name == "Mark")processReleaseDate(fish,d)
+				if(!fish.release_site & d.event_type_name == "Mark")processReleaseSite(fish,d)
+				
+				//console.log("Processing|" + d.event_type_name + "|" + d.tag_code)
+			  
+			    var event = {}
+				event.type = d.event_type_name ? d.event_type_name : "NA";
+				//event.date = d.event_date_time_value ? function(){return d.event_date_time_value} : function(){return d.event_date_mmddyyyy};
+				event.date = d.event_date_time_value ? d.event_date_time_value : d.event_date_mmddyyyy;
+				//site
+				
+				if(d.event_site_code_value)event.site = d.event_site_code_value
+				else if(d.event_site_info_code)event.site = d.event_site_info_code
+				else if(d.event_site_name)event.site = d.event_site_name.split(" - ")[0];
+				else event.site = "Unknown"
+				//antenna
+				if(d.antenna_id)event.antenna_id= d.antenna_id;
+				if(d.antenna_group_name){
+					event.antenna_group_name = d.antenna_group_name;
+					if(d.antenna_group_configuration_value)event.antenna_config = d.antenna_group_configuration_value;
+					if(d.antenna_group_sort_value)event.antenna_group_sort = d.antenna_group_sort_value;
+				}
+
+				//check for release length and width
+				if(d.event_length_mm>0){
+					if(d.event_type_name == "Mark")fish.length = d.event_length_mm;
+				}
+				if(d.event_weight_g>0){
+					if(d.event_type_name == "Mark")fish.weight = d.event_weight_g;	
+				}
+				
+			}
+			//add Release Event
+			if (d.event_type_name == "Mark"){
+				//console.log("Adding|Release|" + d.tag_code + "|" + fish.rel_date)
+				var release_date = fish.rel_date;
+				if(fish.rel_date <= event.date){
+					release_date = new Date(event.date.getTime() + 1000)//add 1 second
+				}
+				_this.pushEvent(fish,{type: 'Release', date: release_date, site: fish.rel_site, antenna_id: 'NA', antenna_group_name: 'NA',edata: []},null)
+			}
+			event.edata = []
+			_this.pushEvent(fish,event,d)
+		})
+		/*
+
+*/			
+		
+	}
+	
+	pushEvent(fish,event,data){
+		//don't add these events
+		if(event.type != "Mark Duplicate"){
+			//add function to retrieve data
+			event.data = function(){return data};
+			
+			//add functions to retrieve previous and next
+			
+			event.next = function(){
+				let index = fish.events.indexOf(event);
+				if(index < fish.events.length -1)return fish.events[index+1]
+				else return null
+			}
+			
+			event.previous = function(){
+				let index = fish.events.indexOf(event);
+				if(index > 0)return fish.events[index-1]
+				else return null
+			}
+
+			event.getFish = function(){return fish};
+			
+			//check transport
+			this.checkTransport(fish,event);
+			fish.events.push(event)
+			//console.log("Pushing|" + event.type + "|" + fish.tag_code + "|" + event.date)
+		}	
+	}
+	
+	checkTransport(fish,event){
+		const tsites = ["GRJ","GOJ","LMJ","MCJ"];
+		let good_ants = ["A-RACEWAY","A-RACEWAY / RIVER EXIT","A-SUBSAMPLE","B-RACEWAY","B-RACEWAY / RIVER EXIT","B-SUBSAMPLE","EAST RACEWAY 10","RACEWAY EAST","RACEWAY WEST / RIVER EXIT","SAMPLE TANK","SBYC A-RACEWAY RIVER GATE","SBYC B-RACEWAY RIVER GATE"]
+		const bad_ants = ["FULL FLOW BYPASS","ADULT FISH RETURN","DIVERSION RIVER EXIT","SBYC RIVER EXIT","RIVER-1 EXIT","RIVER-2EXIT","BYPASS RIVER EXIT","DIVERSION GATE","SBYC GATE"]
+		
+		if(event.type == "Observation" && tsites.includes(event.site) && 'antenna_group_name' in event){
+			let year = event.date.getFullYear()
+			//console.log(event.antenna_group_name.includes("RACEWAY") | event.antenna_group_name.includes("SAMPLE"))
+			if((event.antenna_group_name.includes("RACEWAY") | event.antenna_group_name.includes("SAMPLE")) && Transport.tdates[event.site][year]){
+				//let year = event.date.getFullYear()
+				if(event.date >= Transport.tdates[event.site][year].mindate && event.date <= Transport.tdates[event.site][year].maxdate)event.transported = true;
+			}
+			/*
+			else if(!bad_ants.includes(event.antenna_group_name){
+				
+			}
+			*/
+		}
+		if(event.transported)fish.transported = true;
+	}
+
+	sortEvents(){
+		console.log("Sorting events for " + this.fisharray.length + " fish");
+		this.fisharray.forEach(function(fish){
+			fish.events.sort(function(a,b){
+				return a.date-b.date;
+			})
+		})
+	}
+
+	pruneEvents(){
+		console.log("Pruning events")
+		let started = new Date()
+		let _this = this;
+		params.progressbar.init()
+		params.progressbar.updateProgress(75,100,"pruning events")
+		var nfish = this.fisharray.length
+		this.fisharray.forEach(function(fish,ii){
+			//params.progress = ii
+			fish.sites = {Observation: {}, Recapture: {}, "Passive Recapture": {}, Recovery: {}, NA: {}}
+			fish.events.forEach(function(event,i){
+				if(event.type in fish.sites)fish.sites[event.type][event.site] = true
+				if(i != 0 && i < fish.events.length-1){
+					if(_this.purge_level == "none"){}
+					else if(event[_this.purge_level] == event.previous()[_this.purge_level] && event[_this.purge_level] == event.next()[_this.purge_level] && event.type == "Observation"){
+						if(event.date-event.previous().date < _this.purge_time*60000)event.remove = true
+					}
+				}
+			})
+			Object.keys(fish.sites).forEach(function(sitetype){
+				fish.sites[sitetype] = Object.keys(fish.sites[sitetype])
+			})
+			fish.events = fish.events.filter(function(d){return !d.remove})
+			//params.progressbar.updateProgress(ii,nfish,"pruning events")
+		})
+		let time = (new Date() - started)/1000
+		console.log("Pruning completed in " + time + " seconds")
+		params.progressbar.clear()
+	}
+
+	tossFish(){
+		let _this = this;
+		let remove = {}
+		this.badfish = this.fisharray.filter(function(d){
+			if(!d.rel_site || !d.rel_date){
+				return true;
+			}
+			else if(_this.remove_zeroevents & d.events.filter(function(dd){return dd.type != "Mark" & dd.type != "Release"}).length == 0){
+				return true;
+			}
+			else return false; 
+		})
+		
+		if(this.badfish.length > 0)
+		this.badfish.forEach(function(d){remove[d.tag_code] = true;})
+		
+		this.fisharray = this.fisharray.filter(function(d){
+			if(remove[d.tag_code])return false;
+			else return true; 
+		})
+		
+		console.log(Object.keys(remove).length + " removed")
+		console.log(this.fisharray.length + " fish retained")
+		
+		return this;
+	}	
+	
+	saveToJSON(){
+	
+		function saveAs(blob, filename) {
+		  if (typeof navigator.msSaveOrOpenBlob !== 'undefined') {
+			return navigator.msSaveOrOpenBlob(blob, fileName);
+		  } else if (typeof navigator.msSaveBlob !== 'undefined') {
+			return navigator.msSaveBlob(blob, fileName);
+		  } else {
+			var elem = window.document.createElement('a');
+			elem.href = window.URL.createObjectURL(blob);
+			elem.download = filename;
+			elem.style = 'display:none;opacity:0;color:transparent;';
+			(document.body || document.documentElement).appendChild(elem);
+			if (typeof elem.click === 'function') {
+			  elem.click();
+			} else {
+			  elem.target = '_blank';
+			  elem.dispatchEvent(new MouseEvent('click', {
+				view: window,
+				bubbles: true,
+				cancelable: true
+			  }));
+			}
+			URL.revokeObjectURL(elem.href);
+		  }
+		}	
+	
+		var zip = new JSZip();
+		// Add an top-level, arbitrary text file with contents
+		zip.file("archive.json", JSON.stringify({fishes: this.fishes, datasets: this.datasets}, null, 2));
+
+	/*
+		// Generate a directory within the Zip file structure
+		var img = zip.folder("images");
+		
+		// Add a file to the directory, in this case an image with data URI as contents
+		img.file("smile.gif", imgData, {base64: true});
+		*/
+		// Generate the zip file asynchronously
+		zip.generateAsync({type:"blob",compression: "DEFLATE"})
+		.then(function(content) {
+			// Force down of the Zip file
+			saveAs(content, "PITfish.zip");
+		});	
+	}
+
+
+}
+
+
+
+
+class PTAGIS{
+	constructor(options){
+		if (!options.file | !options.processor | !options.result) {
+			console.log(options)
+			return null;
+		}
+		var _this = this;
+		var res;
+		this.file = options.file
+		var processor = options.processor
+		var pos = options.result.indexOf('"')
+		var prehead = options.result.slice(0,pos)
+		this.title = _this.file.name;
+		_this.filter = "NA"
+		if(prehead != ""){
+			const splitLines = str => str.split(/\r?\n/)
+			prehead = splitLines(prehead)
+			if(prehead[0] == "Report Filter:"){
+				_this.filter = prehead[1]
+			}
+			else if(prehead.length>2){
+				_this.title = prehead[0];
+				_this.filter = prehead[3];
+			}
+		}
+		var csv = options.result.slice(pos)
+		var csvheader = csv.slice(0,csv.indexOf('\n')).replace("\r","")
+		csvheader = _this.changeAttributeNames(csvheader,PTAGIS_names)
+			
+		var newcsv = csvheader + '\n' + csv.slice(csv.indexOf('\n')+1)
+		//console.log(newcsv)
+		res = d3.csv.parse(newcsv)
+		console.log(res.length + " detections read")
+		_this.data = res;
+		_this.setReportType()
+		//console.log(_this)
+		_this.initAttributes()
+		_this.process(processor)
+	}
+	
+	process(processor){
+		processor.addFish(this)
+	}
+	
+	changeAttributeNames(header,ptagis){
+		var newheader = []
+		var PTAGIS_vars = {}
+		var splitheader = header.replaceAll('"','').split(",")
+		//console.log(splitheader)
+		splitheader.forEach(function(d){
+			var namemap = ptagis[d];
+			if(!namemap)console.log(header)
+			newheader.push(namemap.Clean)
+			PTAGIS_vars[namemap.Clean] = {PTAGIS: namemap.PTAGIS, Format: namemap.Format, Level: namemap.Level}
+		})
+		this.PTAGIS_vars = PTAGIS_vars;
+		return newheader;
+	}
+	
+	changeAttributeNames2(header){
+		//var names = header.replace('"','').split(",")
+		header = header.replaceAll("-","_")
+		return header.toLowerCase().replaceAll(" ","_")
+	}	
+	
+	initAttributes(){
+		let dateFormat1 = d3.time.format("%m/%d/%Y");
+		let dateFormat2 = d3.time.format("%m/%d/%Y %H:%M:%S %p");
+		const attrset = this.PTAGIS_vars
+		const attrlist = Object.keys(this.data[0])
+		//console.log(attrset)
+		this.data.forEach(function(d){
+			//console.log(d)
+			attrlist.forEach(function(dd){
+				switch (attrset[dd].Format) {
+				  case 'number':
+					d[dd] = +d[dd]
+					break;
+				  case 'int':
+					d[dd] = +d[dd]
+					break;				  
+				  case 'date':
+					d[dd] = dateFormat1.parse(d[dd])
+					break;
+				  case 'datetime':
+					d[dd] = dateFormat2.parse(d[dd])
+					break;					
+				  default:
+					
+				}
+			})
+		})
+	}
+	
+	setReportType(){
+		var _this = this;
+		var repmap = {
+			"count": "Interrogation Summary",
+			"cth_count": "Complete Tag History",
+			"obs_count": "Interrogation Detail",
+			"mark_count": "Tagging Detail",
+			"mort_count": "Mortality Detail",
+			"recap_count": "Recapture Detail"
+		}
+		params.data = this.data
+		this.report_type = "NA"
+		Object.keys(repmap).forEach(function(type){
+			if(Object.keys(_this.data[0]).includes(type))_this.report_type = repmap[type]
+		})
+	}
+	
+	
+}
+
+class Exporter {
+	constructor(args){
+		var _this = this;
+		this.target = args.target ? args.target : ".export-options";
+		this.data = args.data
+		this.export_options = args.export_options
+	}
+	
+	doExport(){
+		function validType(value){
+			if(Array.isArray(value))return false;
+			else if(value instanceof Function)return false;
+			else if(typeof value != "object")return true;
+			else if(Object.prototype.toString.call(value) === '[object Date]')return true;
+			else return false;
+		}
+		var json, csv, blob;
+		let filters = params.fishfilter.filtersApplied()
+		let metadata = params.fishdata.getMetadata()
+		switch (this.export_options.filetype) {
+			case 'json':
+			  json = {
+				data: this.data,
+				filters: filters,
+				metadata: metadata
+			  }
+			  blob = new Blob([JSON.stringify(json, null, 2)], { type: 'text/csv;charset=utf-8;' });
+			  this.saveAs(blob,"export.json")
+			  break;
+			case 'json-zip':
+			  this.zipSave([
+				{filename: "fish.json", content: JSON.stringify(this.data, null, 2)},
+				{filename: "filters.json", content: JSON.stringify(filters, null, 2)},
+				{filename: "metadata.json", content: JSON.stringify(metadata, null, 2)}
+			  ],"export.json.zip")
+			  break;
+			case 'csv-zip':
+			  let arr = [], edata = []
+			  this.data.forEach(function(fish){
+				fish.events.forEach(function(event){
+					let newevent = {}
+					Object.keys(fish).forEach(function(d){
+						if(validType(fish[d]))newevent[d] = fish[d];
+					})
+					Object.keys(event).forEach(function(dd){
+						if(validType(event[dd]))newevent[dd] = event[dd];
+					})
+					if(!event.edata)console.log(event.getFish())
+					event.edata.forEach(function(ed){
+						if(ed.Freq == "hourly"){
+							let env = {tag_code: fish.tag_code, event_site: event.site, event_date: event.date}
+						
+							Object.keys(ed).forEach(function(ddd){
+								env[ddd] = ed[ddd]
+							})
+							edata.push(env)
+						}
+					})
+					arr.push(newevent)
+				})
+			  })
+			  let headers = Object.keys(arr[0])
+			  console.log(arr)
+			  let csv = new CSV({headers: headers, data: arr, filename: "fishevents"})
+			  csv.encodeCSV()
+			  let zipfiles = []
+			  zipfiles.push({filename: "fishevents.csv", content: csv.csv})
+			  /*
+			  if(Object.keys(params.edata.data.daily).length>0){
+				let daily = []
+				Object.keys(params.edata.data.daily).forEach(function(d){daily.push(params.edata.data.daily[d])})
+				let daily_headers = Object.keys(daily)
+				console.log(daily)
+				let daily_csv = new CSV({headers: daily_headers, data: daily, filename: "DART_Daily"})
+				daily_csv.encodeCSV()
+				zipfiles.push({filename: "DART_Daily.csv", content: daily_csv.csv})
+			  }
+			  */
+			  if(edata.length>0){
+				console.log(edata)
+				let edata_csv = new CSV({headers: Object.keys(edata[0]), data: edata, filename: "DART_edata"})
+				edata_csv.encodeCSV()
+				zipfiles.push({filename: "environmental_attributes.csv", content: edata_csv.csv})
+			  }			  
+			  zipfiles.push({filename: "filters.txt", content: JSON.stringify(filters, null, 2)})
+		      zipfiles.push({filename: "metadata.txt", content: JSON.stringify(metadata, null, 2)})			
+			  this.zipSave(zipfiles,"export.csv.zip")
+	
+			  break;			  
+			default:
+		}
+	}
+	
+	zipSave (files,filename){
+		let _this = this;
+		var zip = new JSZip();
+		// Add an top-level, arbitrary text file with contents
+		
+		files.forEach(function(file){
+			zip.file(file.filename,file.content)
+		})
+	/*
+		// Generate a directory within the Zip file structure
+		var img = zip.folder("images");
+		
+		// Add a file to the directory, in this case an image with data URI as contents
+		img.file("smile.gif", imgData, {base64: true});
+		*/
+		// Generate the zip file asynchronously
+		zip.generateAsync({type:"blob",compression: "DEFLATE"})
+		.then(function(content) {
+			// Force down of the Zip file
+			_this.saveAs(content, filename);
+		});	
+		
+	}
+	
+	saveAs(blob, filename) {
+		  if (typeof navigator.msSaveOrOpenBlob !== 'undefined') {
+			return navigator.msSaveOrOpenBlob(blob, fileName);
+		  } else if (typeof navigator.msSaveBlob !== 'undefined') {
+			return navigator.msSaveBlob(blob, fileName);
+		  } else {
+			var elem = window.document.createElement('a');
+			elem.href = window.URL.createObjectURL(blob);
+			elem.download = filename;
+			elem.style = 'display:none;opacity:0;color:transparent;';
+			(document.body || document.documentElement).appendChild(elem);
+			if (typeof elem.click === 'function') {
+			  elem.click();
+			} else {
+			  elem.target = '_blank';
+			  elem.dispatchEvent(new MouseEvent('click', {
+				view: window,
+				bubbles: true,
+				cancelable: true
+			  }));
+			}
+			URL.revokeObjectURL(elem.href);
+		  }
+		}
+
+}
+
+
+class CSV{
+	constructor(args){
+		var _this = this;
+		var data = args.data || null;
+		this.items = [];
+		this.types = [];
+		if (data == null || !data.length) {
+			console.log("Fail")
+			return null;
+		}
+		this.stringDelimiter = args.stringDelimiter || '"';
+		this.columnDelimiter = args.columnDelimiter || ',';
+		this.lineDelimiter = args.lineDelimiter || '\n';
+		this.dateFormat1 = d3.time.format("%m/%d/%Y");
+		this.dateFormat2 = d3.time.format("%m/%d/%Y %H:%M:%S %p");
+		this.fileTitle = args.filename || 'export';
+		this.keys = args.headers;
+		
+		function getMsSinceMidnight(d) {
+		  var e = new Date(d);
+		  return d - e.setHours(0,0,0,0);
+		}
+		
+		this.keys.forEach(function(d){
+			var type = _this.datatype(data[0][d])
+			if(type == "date"){
+				if(getMsSinceMidnight(data[0][d]) == 0)type = "date";
+				else type = "datetime"
+			}
+			_this.types.push(type);
+		})
+		
+		data.forEach(function(d){
+			var item = {}
+				_this.keys.forEach(function(dd,i){
+					item[dd] = _this.encodeItem(d[dd],i)
+				})
+			_this.items.push(item)
+		})		
+	}
+	
+	encodeItem(item,index){
+		switch(this.types[index]) {
+		  case "string":
+			item = item.replace(/"/g, '""')//escape double quote
+			return this.stringDelimiter + item + this.stringDelimiter;
+			break;
+		  case "date":
+			return this.stringDelimiter + this.dateFormat1(item) + this.stringDelimiter;
+			break;
+		  case "datetime":
+			return this.stringDelimiter + this.dateFormat2(item) + this.stringDelimiter;
+			break;			
+		  default:
+			return item
+		}
+	}
+	
+	encodeCSV() {
+		var array = this.items;
+		var headers = this.keys;
+		var str = '';
+		headers.forEach(function(d,i){
+			str += '"' + d + '"';
+			if(i < headers.length-1)str += ','
+		})
+		str += '\r\n'
+		
+		for (var i = 0; i < array.length; i++) {
+			var line = '';
+			for (var index in array[i]) {
+				if (line != '') line += ','
+				line += (array[i][index]);
+			}
+			str += line + '\r\n';
+		}
+		this.csv =  str;
+		return this;
+	}
+	
+	exportCSV(){
+		    var exportedFilename = this.fileTitle + '.csv' || 'export.csv';
+			var blob = new Blob([this.csv], { type: 'text/csv;charset=utf-8;' });
+			if (navigator.msSaveBlob) { // IE 10+
+				navigator.msSaveBlob(blob, exportedFilename);
+			} else {
+				var link = document.createElement("a");
+				if (link.download !== undefined) { // feature detection
+					// Browsers that support HTML5 download attribute
+					var url = URL.createObjectURL(blob);
+					link.setAttribute("href", url);
+					link.setAttribute("download", exportedFilename);
+					link.style.visibility = 'hidden';
+					document.body.appendChild(link);
+					link.click();
+					document.body.removeChild(link);
+				}
+			}
+	}
+	
+	datatype(obj, showFullClass) {
+		// get toPrototypeString() of obj (handles all types)
+		if (showFullClass && typeof obj === "object") {
+			return Object.prototype.toString.call(obj);
+		}
+		if (obj == null) { return (obj + '').toLowerCase(); } // implicit toString() conversion
+
+		var deepType = Object.prototype.toString.call(obj).slice(8,-1).toLowerCase();
+		if (deepType === 'generatorfunction') { return 'function' }
+
+		// Prevent overspecificity (for example, [object HTMLDivElement], etc).
+		// Account for functionish Regexp (Android <=2.3), functionish <object> element (Chrome <=57, Firefox <=52), etc.
+		// String.prototype.match is universally supported.
+
+		return deepType.match(/^(array|bigint|date|error|function|generator|regexp|symbol)$/) ? deepType :
+		   (typeof obj === 'object' || typeof obj === 'function') ? 'object' : typeof obj;
+    }
+}
+
+class ProgressBar{
+//https://programmer.group/monitor-the-reading-progress-and-display-the-progress-bar-when-uploading-files.html
+	constructor(){
+		this.fullwidth = 500;
+		this.progress = document.querySelector('.percent');
+		this.progress_bar = document.getElementById('progress_bar')
+	}
+  // Update progress bar
+  updateProgress(current,target,label) {
+      var percentLoaded = Math.round((current / target) * 100);
+      // Update progress bar length
+      if (percentLoaded < 100) {
+        this.progress.style.width = percentLoaded + '%';
+        if(percentLoaded>20)this.progress.textContent = label + " " + percentLoaded + '%';
+		else this.progress.textContent = percentLoaded + '%';
+      }
+  }
+  
+  init(){
+	this.progress_bar.className = 'loading';
+    this.progress.style.width = 0 + '%';
+    this.progress.textContent = 0 + '%';	
+  }
+  
+  clear(){
+	this.progress_bar.className = 'loaded';
+  }
+}
+
+function convertArrayOfObjectsToCSV(args) {
+console.log(args)
+var result, ctr, keys, columnDelimiter, lineDelimiter, data;
+
+data = args.data || null;
+if (data == null || !data.length) {
+console.log("Fail")
+return null;
+}
+
+columnDelimiter = args.columnDelimiter || ',';
+lineDelimiter = args.lineDelimiter || '\n';
+
+keys = args.header;
+
+result = '';
+result += keys.join(columnDelimiter);
+result += lineDelimiter;
+
+data.forEach(function(item) {
+ctr = 0;
+keys.forEach(function(key) {
+if (ctr > 0) result += columnDelimiter;
+
+result += item[key];
+ctr++;
+});
+result += lineDelimiter;
+});
+console.log(result)
+return result;
+}
+
+function downloadCSV(data, header, filename) {
+console.log("downloadCSV called")
+var link;
+var csv = convertArrayOfObjectsToCSV({
+data: data,
+header: header
+});
+if (csv == null) return;
+
+filename || 'export.csv';
+
+if (!csv.match(/^data:text\/csv/i)) {
+csv = 'data:text/csv;charset=utf-8,' + csv;
+}
+data = encodeURI(csv);
+
+link = document.createElement('a');
+link.setAttribute('href', data);
+link.setAttribute('download', filename);
+link.click();
+console.log("downloadCSV finished")
+}	
+
+function processRow(row) {
+	var finalVal = '';
+	for (var j = 0; j < row.length; j++) {
+		var innerValue = row[j] === null ? '' : row[j].toString();
+		if (row[j] instanceof Date) {
+			innerValue = row[j].toLocaleString();
+		};
+		var result = innerValue.replace(/"/g, '""');
+		if (result.search(/("|,|\n)/g) >= 0)
+			result = '"' + result + '"';
+		if (j > 0)
+			finalVal += ',';
+		finalVal += result;
+	}
+	return finalVal + '\n';
+};
+
+
+
+function convertToCSV(objArray) {
+    var array = typeof objArray != 'object' ? JSON.parse(objArray) : objArray;
+    var str = '';
+
+    for (var i = 0; i < array.length; i++) {
+        var line = '';
+        for (var index in array[i]) {
+            if (line != '') line += ','
+
+            line += (array[i][index]);
+        }
+
+        str += line + '\r\n';
+    }
+
+    return str;
+}
+
+function sanitizeString (desc) {
+    var itemDesc;
+    if (desc) {
+        itemDesc = desc.replace(/(\r\n|\n|\r|\s+|\t|&nbsp;)/gm,' ');
+        itemDesc = itemDesc.replace(/"/g, '""');
+        itemDesc = itemDesc.replace(/ +(?= )/g,'');
+    } else {
+        itemDesc = '';
+    }
+    return itemDesc;
+}
+
+function exportCSVFile(headers, _items, fileTitle) {
+
+	var items = []
+	
+	_items.forEach(function(d){
+		item = {}
+		headers.forEach(function(dd){
+			item[dd] = d[dd]
+		})
+		items.push(item)
+	})
+	
+	items.unshift(headers);
+
+    // Convert Object to JSON
+    var jsonObject = JSON.stringify(items);
+
+    var csv = convertToCSV(jsonObject);
+
+    var exportedFilename = fileTitle + '.csv' || 'export.csv';
+
+    var blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    if (navigator.msSaveBlob) { // IE 10+
+        navigator.msSaveBlob(blob, exportedFilename);
+    } else {
+        var link = document.createElement("a");
+        if (link.download !== undefined) { // feature detection
+            // Browsers that support HTML5 download attribute
+            var url = URL.createObjectURL(blob);
+            link.setAttribute("href", url);
+            link.setAttribute("download", exportedFilename);
+            link.style.visibility = 'hidden';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+    }
+}
+params.hucnames = {"170101":{"name":"Kootenai","latitude":49.15,"longitude":-115.79},"170102":{"name":"Pend Oreille","latitude":47.52,"longitude":-114.46},"170103":{"name":"Spokane","latitude":47.57,"longitude":-116.71},"170200":{"name":"Upper Columbia","latitude":48.46,"longitude":-119.29},"170300":{"name":"Yakima","latitude":46.69,"longitude":-120.59},"170401":{"name":"Snake Headwaters","latitude":43.44,"longitude":-110.71},"170402":{"name":"Upper Snake","latitude":43.2,"longitude":-113.15},"170501":{"name":"Middle Snake-Boise","latitude":43.19,"longitude":-116.62},"170502":{"name":"Middle Snake-Powder","latitude":44.74,"longitude":-117.52},"170601":{"name":"Lower Snake","latitude":46.17,"longitude":-117.55},"170602":{"name":"Salmon","latitude":44.93,"longitude":-114.84},"170603":{"name":"Clearwater","latitude":46.35,"longitude":-115.59},"170701":{"name":"Middle Columbia","latitude":45.8,"longitude":-119.82},"170702":{"name":"John Day","latitude":44.81,"longitude":-119.56},"170703":{"name":"Deschutes","latitude":44.27,"longitude":-120.98},"170800":{"name":"Lower Columbia","latitude":46.14,"longitude":-122.48},"170900":{"name":"Willamette","latitude":44.61,"longitude":-122.69},"171001":{"name":"Washington Coastal","latitude":47.22,"longitude":-123.79},"171002":{"name":"Northern Oregon Coastal","latitude":44.95,"longitude":-123.76},"171003":{"name":"Southern Oregon Coastal","latitude":42.86,"longitude":-123.4},"171100":{"name":"Puget Sound","latitude":48.12,"longitude":-122.5},"171200":{"name":"Oregon Closed Basins (Malheur)","latitude":42.91,"longitude":-119.57},"17010101":{"name":"Middle Kootenai","latitude":48.93,"longitude":-115.36},"17010102":{"name":"Fisher","latitude":48.17,"longitude":-115.15},"17010103":{"name":"Yaak","latitude":48.88,"longitude":-115.74},"17010104":{"name":"Lower Kootenai","latitude":49.36,"longitude":-116.72},"17010105":{"name":"Moyie","latitude":49.15,"longitude":-116.03},"17010106":{"name":"Elk","latitude":49.76,"longitude":-114.9},"17010201":{"name":"Upper Clark Fork","latitude":46.33,"longitude":-112.75},"17010202":{"name":"Flint-Rock","latitude":46.43,"longitude":-113.49},"17010203":{"name":"Blackfoot","latitude":47.02,"longitude":-113.11},"17010204":{"name":"Middle Clark Fork","latitude":47.11,"longitude":-114.74},"17010205":{"name":"Bitterroot","latitude":46.19,"longitude":-114.14},"17010206":{"name":"North Fork Flathead","latitude":48.93,"longitude":-114.38},"17010207":{"name":"Middle Fork Flathead","latitude":48.33,"longitude":-113.53},"17010208":{"name":"Flathead Lake","latitude":48.06,"longitude":-114.25},"17010209":{"name":"South Fork Flathead","latitude":47.79,"longitude":-113.46},"17010210":{"name":"Stillwater","latitude":48.47,"longitude":-114.6},"17010211":{"name":"Swan","latitude":47.67,"longitude":-113.8},"17010212":{"name":"Lower Flathead","latitude":47.51,"longitude":-114.35},"17010213":{"name":"Lower Clark Fork","latitude":47.82,"longitude":-115.42},"17010214":{"name":"Pend Oreille Lake","latitude":48.2,"longitude":-116.59},"17010215":{"name":"Priest","latitude":48.59,"longitude":-116.91},"17010216":{"name":"Pend Oreille","latitude":48.79,"longitude":-117.29},"17010301":{"name":"Upper Coeur d'Alene","latitude":47.77,"longitude":-116.15},"17010302":{"name":"South Fork Coeur d'Alene","latitude":47.49,"longitude":-116.03},"17010303":{"name":"Coeur d'Alene Lake","latitude":47.55,"longitude":-116.67},"17010304":{"name":"St. Joe","latitude":47.2,"longitude":-116.06},"17010305":{"name":"Upper Spokane","latitude":47.77,"longitude":-116.95},"17010306":{"name":"Hangman","latitude":47.38,"longitude":-117.15},"17010307":{"name":"Lower Spokane","latitude":47.84,"longitude":-117.87},"17010308":{"name":"Little Spokane","latitude":47.97,"longitude":-117.33},"17020001":{"name":"Franklin D. Roosevelt Lake","latitude":48.96,"longitude":-118.09},"17020002":{"name":"Kettle","latitude":49.32,"longitude":-118.68},"17020003":{"name":"Colville","latitude":48.39,"longitude":-117.78},"17020004":{"name":"Sanpoil","latitude":48.43,"longitude":-118.8},"17020005":{"name":"Chief Joseph","latitude":48.06,"longitude":-119.41},"17020006":{"name":"Okanogan","latitude":49.37,"longitude":-119.5},"17020007":{"name":"Similkameen","latitude":49.3,"longitude":-120.35},"17020008":{"name":"Methow","latitude":48.53,"longitude":-120.25},"17020009":{"name":"Lake Chelan","latitude":48.19,"longitude":-120.57},"17020010":{"name":"Upper Columbia-Entiat","latitude":47.46,"longitude":-120.23},"17020011":{"name":"Wenatchee","latitude":47.71,"longitude":-120.79},"17020012":{"name":"Moses Coulee","latitude":47.61,"longitude":-119.73},"17020013":{"name":"Upper Crab","latitude":47.52,"longitude":-118.51},"17020014":{"name":"Banks Lake","latitude":47.68,"longitude":-119.22},"17020015":{"name":"Lower Crab","latitude":47.11,"longitude":-119.19},"17020016":{"name":"Upper Columbia-Priest Rapids","latitude":46.66,"longitude":-119.16},"17030001":{"name":"Upper Yakima","latitude":47.09,"longitude":-120.74},"17030002":{"name":"Naches","latitude":46.79,"longitude":-121.13},"17030003":{"name":"Lower Yakima","latitude":46.35,"longitude":-120.28},"17040101":{"name":"Snake Headwaters","latitude":43.97,"longitude":-110.47},"17040102":{"name":"Gros Ventre","latitude":43.54,"longitude":-110.24},"17040103":{"name":"Greys-Hobock","latitude":43.2,"longitude":-110.66},"17040104":{"name":"Palisades","latitude":43.38,"longitude":-111.28},"17040105":{"name":"Salt","latitude":42.8,"longitude":-111.03},"17040201":{"name":"Idaho Falls","latitude":43.7,"longitude":-112.04},"17040202":{"name":"Upper Henrys","latitude":44.37,"longitude":-111.36},"17040203":{"name":"Lower Henrys","latitude":44.09,"longitude":-111.43},"17040204":{"name":"Teton","latitude":43.79,"longitude":-111.26},"17040205":{"name":"Willow","latitude":43.27,"longitude":-111.64},"17040206":{"name":"American Falls","latitude":43.1,"longitude":-112.63},"17040207":{"name":"Blackfoot","latitude":43.04,"longitude":-111.74},"17040208":{"name":"Portneuf","latitude":42.76,"longitude":-112.17},"17040209":{"name":"Lake Walcott","latitude":42.87,"longitude":-113.45},"17040210":{"name":"Raft","latitude":42.19,"longitude":-113.38},"17040211":{"name":"Goose","latitude":42.07,"longitude":-114.02},"17040212":{"name":"Upper Snake-Rock","latitude":42.65,"longitude":-114.53},"17040213":{"name":"Salmon Falls","latitude":41.97,"longitude":-114.81},"17040214":{"name":"Beaver-Camas","latitude":44.21,"longitude":-112.13},"17040215":{"name":"Medicine Lodge","latitude":44.08,"longitude":-112.59},"17040216":{"name":"Birch","latitude":44.17,"longitude":-112.96},"17040217":{"name":"Little Lost","latitude":44.06,"longitude":-113.26},"17040218":{"name":"Big Lost","latitude":43.74,"longitude":-113.49},"17040219":{"name":"Big Wood","latitude":43.42,"longitude":-114.47},"17040220":{"name":"Camas","latitude":43.35,"longitude":-114.83},"17040221":{"name":"Little Wood","latitude":43.26,"longitude":-114.1},"17050101":{"name":"C.J. Strike Reservoir","latitude":42.95,"longitude":-115.5},"17050102":{"name":"Bruneau","latitude":42.26,"longitude":-115.65},"17050103":{"name":"Middle Snake-Succor","latitude":43.2,"longitude":-116.6},"17050104":{"name":"Upper Owyhee","latitude":42.19,"longitude":-116.32},"17050105":{"name":"South Fork Owyhee","latitude":41.69,"longitude":-116.42},"17050106":{"name":"East Little Owyhee","latitude":41.87,"longitude":-117.02},"17050107":{"name":"Middle Owyhee","latitude":42.45,"longitude":-117.23},"17050108":{"name":"Jordan","latitude":42.94,"longitude":-117.06},"17050109":{"name":"Crooked-Rattlesnake","latitude":42.6,"longitude":-117.77},"17050110":{"name":"Lower Owyhee","latitude":43.32,"longitude":-117.64},"17050111":{"name":"North and Middle Forks Boise","latitude":43.87,"longitude":-115.36},"17050112":{"name":"Boise-Mores","latitude":43.77,"longitude":-115.86},"17050113":{"name":"South Fork Boise","latitude":43.55,"longitude":-115.23},"17050114":{"name":"Lower Boise","latitude":43.6,"longitude":-116.41},"17050115":{"name":"Middle Snake-Payette","latitude":44.02,"longitude":-116.97},"17050116":{"name":"Upper Malheur","latitude":43.76,"longitude":-118.36},"17050117":{"name":"Lower Malheur","latitude":43.8,"longitude":-117.6},"17050118":{"name":"Bully","latitude":44.05,"longitude":-117.78},"17050119":{"name":"Willow","latitude":44.26,"longitude":-117.65},"17050120":{"name":"South Fork Payette","latitude":44.17,"longitude":-115.49},"17050121":{"name":"Middle Fork Payette","latitude":44.29,"longitude":-115.85},"17050122":{"name":"Payette","latitude":44.07,"longitude":-116.41},"17050123":{"name":"North Fork Payette","latitude":44.69,"longitude":-116.01},"17050124":{"name":"Weiser","latitude":44.57,"longitude":-116.58},"17050201":{"name":"Brownlee Reservoir","latitude":44.73,"longitude":-116.99},"17050202":{"name":"Burnt","latitude":44.53,"longitude":-117.85},"17050203":{"name":"Powder","latitude":44.87,"longitude":-117.72},"17060101":{"name":"Hells Canyon","latitude":45.58,"longitude":-116.58},"17060102":{"name":"Imnaha","latitude":45.4,"longitude":-116.9},"17060103":{"name":"Lower Snake-Asotin","latitude":46.17,"longitude":-117.1},"17060104":{"name":"Upper Grande Ronde","latitude":45.34,"longitude":-118.08},"17060105":{"name":"Wallowa","latitude":45.42,"longitude":-117.45},"17060106":{"name":"Lower Grande Ronde","latitude":45.86,"longitude":-117.37},"17060107":{"name":"Lower Snake-Tucannon","latitude":46.52,"longitude":-117.64},"17060108":{"name":"Palouse","latitude":46.94,"longitude":-117.51},"17060109":{"name":"Rock","latitude":47.18,"longitude":-117.55},"17060110":{"name":"Lower Snake","latitude":46.45,"longitude":-118.65},"17060201":{"name":"Upper Salmon","latitude":44.27,"longitude":-114.51},"17060202":{"name":"Pahsimeroi","latitude":44.43,"longitude":-113.77},"17060203":{"name":"Middle Salmon-Panther","latitude":45.2,"longitude":-114.12},"17060204":{"name":"Lemhi","latitude":44.78,"longitude":-113.5},"17060205":{"name":"Upper Middle Fork Salmon","latitude":44.61,"longitude":-115.08},"17060206":{"name":"Lower Middle Fork Salmon","latitude":45.02,"longitude":-114.83},"17060207":{"name":"Middle Salmon-Chamberlain","latitude":45.46,"longitude":-115.25},"17060208":{"name":"South Fork Salmon","latitude":44.96,"longitude":-115.63},"17060209":{"name":"Lower Salmon","latitude":45.71,"longitude":-116.32},"17060210":{"name":"Little Salmon","latitude":45.15,"longitude":-116.32},"17060301":{"name":"Upper Selway","latitude":45.86,"longitude":-114.72},"17060302":{"name":"Lower Selway","latitude":46.09,"longitude":-115.09},"17060303":{"name":"Lochsa","latitude":46.41,"longitude":-114.96},"17060304":{"name":"Middle Fork Clearwater","latitude":46.1,"longitude":-115.8},"17060305":{"name":"South Fork Clearwater","latitude":45.86,"longitude":-115.79},"17060306":{"name":"Clearwater","latitude":46.46,"longitude":-116.38},"17060307":{"name":"Upper North Fork Clearwater","latitude":46.7,"longitude":-115.27},"17060308":{"name":"Lower North Fork Clearwater","latitude":46.82,"longitude":-115.94},"17070101":{"name":"Middle Columbia-Lake Wallula","latitude":45.91,"longitude":-119.77},"17070102":{"name":"Walla Walla","latitude":46.12,"longitude":-118.28},"17070103":{"name":"Umatilla","latitude":45.59,"longitude":-118.88},"17070104":{"name":"Willow","latitude":45.39,"longitude":-119.73},"17070105":{"name":"Middle Columbia-Hood","latitude":45.69,"longitude":-121.47},"17070106":{"name":"Klickitat","latitude":46.04,"longitude":-121.12},"17070201":{"name":"Upper John Day","latitude":44.38,"longitude":-119.3},"17070202":{"name":"North Fork John Day","latitude":44.93,"longitude":-119.01},"17070203":{"name":"Middle Fork John Day","latitude":44.72,"longitude":-118.86},"17070204":{"name":"Lower John Day","latitude":45.06,"longitude":-120.24},"17070301":{"name":"Upper Deschutes","latitude":44.15,"longitude":-121.58},"17070302":{"name":"Little Deschutes","latitude":43.52,"longitude":-121.62},"17070303":{"name":"Beaver-South Fork","latitude":43.88,"longitude":-120.02},"17070304":{"name":"Upper Crooked","latitude":44.14,"longitude":-120.34},"17070305":{"name":"Lower Crooked","latitude":44.1,"longitude":-120.85},"17070306":{"name":"Lower Deschutes","latitude":45.02,"longitude":-121.24},"17070307":{"name":"Trout","latitude":44.73,"longitude":-120.82},"17080001":{"name":"Lower Columbia-Sandy","latitude":45.49,"longitude":-122.08},"17080002":{"name":"Lewis","latitude":46.02,"longitude":-122.17},"17080003":{"name":"Lower Columbia-Clatskanie","latitude":46.04,"longitude":-122.92},"17080004":{"name":"Upper Cowlitz","latitude":46.53,"longitude":-121.71},"17080005":{"name":"Lower Cowlitz","latitude":46.38,"longitude":-122.56},"17080006":{"name":"Lower Columbia","latitude":46.2,"longitude":-123.69},"17090001":{"name":"Middle Fork Willamette","latitude":43.76,"longitude":-122.4},"17090002":{"name":"Coast Fork Willamette","latitude":43.72,"longitude":-122.9},"17090003":{"name":"Upper Willamette","latitude":44.41,"longitude":-123.21},"17090004":{"name":"Mckenzie","latitude":44.16,"longitude":-122.27},"17090005":{"name":"North Santiam","latitude":44.72,"longitude":-122.23},"17090006":{"name":"South Santiam","latitude":44.52,"longitude":-122.52},"17090007":{"name":"Middle Willamette","latitude":45.05,"longitude":-122.99},"17090008":{"name":"Yamhill","latitude":45.16,"longitude":-123.37},"17090009":{"name":"Molalla-Pudding","latitude":45.04,"longitude":-122.61},"17090010":{"name":"Tualatin","latitude":45.54,"longitude":-123.05},"17090011":{"name":"Clackamas","latitude":45.11,"longitude":-122.09},"17090012":{"name":"Lower Willamette","latitude":45.63,"longitude":-122.74},"17100101":{"name":"Hoh-Quillayute","latitude":47.96,"longitude":-124.32},"17100102":{"name":"Queets-Quinault","latitude":47.49,"longitude":-124.01},"17100103":{"name":"Upper Chehalis","latitude":46.71,"longitude":-123.04},"17100104":{"name":"Lower Chehalis","latitude":47.16,"longitude":-123.53},"17100105":{"name":"Grays Harbor","latitude":47.1,"longitude":-123.92},"17100106":{"name":"Willapa Bay","latitude":46.62,"longitude":-123.8},"17100201":{"name":"Necanicum","latitude":45.94,"longitude":-123.96},"17100202":{"name":"Nehalem","latitude":45.84,"longitude":-123.47},"17100203":{"name":"Wilson-Trusk-Nestuccu","latitude":45.39,"longitude":-123.75},"17100204":{"name":"Siletz-Yaquina","latitude":44.78,"longitude":-123.86},"17100205":{"name":"Alsea","latitude":44.34,"longitude":-123.89},"17100206":{"name":"Siuslaw","latitude":44.02,"longitude":-123.66},"17100207":{"name":"Siltcoos","latitude":43.87,"longitude":-124.11},"17100301":{"name":"North Umpqua","latitude":43.3,"longitude":-122.65},"17100302":{"name":"South Umpqua","latitude":42.98,"longitude":-123.17},"17100303":{"name":"Umpqua","latitude":43.61,"longitude":-123.56},"17100304":{"name":"Coos","latitude":43.4,"longitude":-124.07},"17100305":{"name":"Coquille","latitude":43.04,"longitude":-124.01},"17100306":{"name":"Sixes","latitude":42.78,"longitude":-124.41},"17100307":{"name":"Upper Rogue","latitude":42.66,"longitude":-122.5},"17100308":{"name":"Middle Rogue","latitude":42.39,"longitude":-122.95},"17100309":{"name":"Applegate","latitude":42.16,"longitude":-123.17},"17100310":{"name":"Lower Rogue","latitude":42.6,"longitude":-123.74},"17100311":{"name":"Illinois","latitude":42.27,"longitude":-123.73},"17100312":{"name":"Chetco","latitude":42.2,"longitude":-124.18},"17110001":{"name":"Sumas River","latitude":49.02,"longitude":-121.75},"17110002":{"name":"Strait of Georgia","latitude":48.85,"longitude":-122.79},"17110003":{"name":"San Juan Islands","latitude":48.66,"longitude":-123.2},"17110004":{"name":"Nooksack","latitude":48.82,"longitude":-122.18},"17110005":{"name":"Upper Skagit","latitude":48.78,"longitude":-121.2},"17110006":{"name":"Sauk","latitude":48.2,"longitude":-121.31},"17110007":{"name":"Lower Skagit","latitude":48.45,"longitude":-122.08},"17110008":{"name":"Stillaguamish","latitude":48.23,"longitude":-121.89},"17110009":{"name":"Skykomish","latitude":47.82,"longitude":-121.48},"17110010":{"name":"Snoqualmie","latitude":47.59,"longitude":-121.69},"17110011":{"name":"Snohomish","latitude":48,"longitude":-122.04},"17110012":{"name":"Lake Washington","latitude":47.57,"longitude":-122.05},"17110013":{"name":"Duwamish","latitude":47.29,"longitude":-121.85},"17110014":{"name":"Puyallup","latitude":47.05,"longitude":-121.88},"17110015":{"name":"Nisqually","latitude":46.85,"longitude":-122.28},"17110016":{"name":"Deschutes","latitude":46.86,"longitude":-122.64},"17110017":{"name":"Skokomish","latitude":47.44,"longitude":-123.33},"17110018":{"name":"Hood Canal","latitude":47.66,"longitude":-122.98},"17110019":{"name":"Puget Sound","latitude":47.64,"longitude":-122.64},"17110020":{"name":"Dungeness-Elwha","latitude":48.12,"longitude":-123.27},"17110021":{"name":"Crescent-Hoko","latitude":48.48,"longitude":-124.23},"17120001":{"name":"Harney-Malheur Lakes","latitude":43.36,"longitude":-118.83},"17120002":{"name":"Silvies","latitude":43.85,"longitude":-119.1},"17120003":{"name":"Donner und Blitzen","latitude":42.88,"longitude":-118.75},"17120004":{"name":"Silver","latitude":43.4,"longitude":-119.55},"17120005":{"name":"Summer Lake","latitude":43.2,"longitude":-120.62},"17120006":{"name":"Lake Abert","latitude":42.63,"longitude":-120.43},"17120007":{"name":"Warner Lakes","latitude":42.41,"longitude":-119.9},"17120008":{"name":"Guano","latitude":42.37,"longitude":-119.29},"17120009":{"name":"Alvord Lake","latitude":42.42,"longitude":-118.38}}
+//load PTAGIS metadata files
+
+	
+function initPTAGIS(intsites,mrrsites,basins_sites){
+	console.log(arguments)
+	var sitemap = {}
+	intsites.forEach(function(d){
+		if(!sitemap[d["Interrogation Site Code"]]){
+			sitemap[d["Interrogation Site Code"]] = {
+				code: d["Interrogation Site Code"],
+				name: d["Interrogation Site Name"],
+				group: "Interrogation",
+				type: d["Site Type Name"],
+				subbasin_code: d["Interrogation Site Subbasin Code"],
+				basin_code: d["Interrogation Site Subbasin Code"].substring(0,6),
+				location: [
+					{
+						isActive: d["Int Site Active"] =="1" ? true : false,
+						start_date: d["Interrogation Site Location Start"],
+						end_date: d["Interrogation Site Location End"],
+						latitude: +d["Interrogation Site Location Latitude"],
+						longitude: +d["Interrogation Site Location Longitude"],
+						rkm: d["Interrogation Site Location RKM"]
+					}
+				],
+				rkm: d["Interrogation Site Location RKM"],
+				latitude: +d["Interrogation Site Location Latitude"],
+				longitude: +d["Interrogation Site Location Longitude"]				
+			}
+		}
+		else sitemap[d["Interrogation Site Code"]].location.push({
+			isActive: d["Int Site Active"] =="1" ? true : false,
+			start_date: d["Interrogation Site Location Start"],
+			end_date: d["Interrogation Site Location End"],
+			latitude: +d["Interrogation Site Location Latitude"],
+			longitude: +d["Interrogation Site Location Longitude"],
+			rkm: d["Interrogation Site Location RKM"]			
+		})
+	})
+	console.log(Object.keys(sitemap).length)
+	mrrsites.forEach(function(d){
+		if(!sitemap[d["MRR Site Info Code"]]){
+			sitemap[d["MRR Site Info Code"]] = {
+				code: d["MRR Site Info Code"],
+				name: d["MRR Site Info Name"],
+				group: "MRR",
+				type: d["MRR Site Type Name"],
+				subbasin_code: d["MRR Site Subbasin Code"],
+				basin_code: d["MRR Site Subbasin Code"].substring(0,6),
+				location: [
+					{
+						latitude: +d["MRR Site Latitude Value"],
+						longitude: +d["MRR Site Longitude Value"],
+						rkm: d["MRR Site Info RKM Mask"]
+					}
+				],
+				rkm: d["MRR Site Info RKM Mask"],
+				latitude: +d["MRR Site Latitude Value"],
+				longitude: +d["MRR Site Longitude Value"]							
+			}
+		}
+	})
+	
+	params.sitemap = sitemap;
+	
+	Object.keys(sitemap).forEach(function(code){
+		sitemap[code].location.forEach(function(d){
+			if(envirosites[d.rkm])sitemap[code].envirosites = envirosites[d.rkm];
+			else sitemap[code].envirosites = [];
+		})
+	})
+	
+	
+	params.edata = new EnviroData({sitemap: sitemap})
+	params.enviroevent = new EnviroEvent({sitemap: sitemap})
+	
+	params.fishtracks = new FishTracks({basins_sites: basins_sites})
+	
+	document.getElementById("spinner").style.visibility = 'hidden';
+	params.progressbar = new ProgressBar();
+	
+	d3.selectAll("input.prune_level").on("change",function(){params.fishdata.purge_level = this.value;})
+	d3.selectAll("input.remove_zeroevents").on("change",function(){params.fishdata.remove_zeroevents = this.value;})
+	
+	d3.select(".layer-control")
+		.style("display","block")
+		
+	d3.selectAll(".popup-dialog")
+		.each(function(d){
+			this.addEventListener('click', function(evt){
+				d3.selectAll(".popup-dialog").style("display","none");
+				d3.selectAll("span.header-btn").classed("active",false)
+				d3.select("#leafmap").style("z-index",'auto')
+				if(params.fishdata.datasets.length == 0){
+					d3.select(".layer-control")
+						.style("display","block")					
+				}			
+			}, false);		
+		})
+		
+	d3.selectAll(".close2-btn")
+		.each(function(d){
+			this.addEventListener('click', function(evt){
+				d3.selectAll(".popup-dialog").style("display","none");
+				d3.selectAll("span.header-btn").classed("active",false)
+				if(params.fishdata.datasets.length == 0){
+					d3.select(".layer-control")
+						.style("display","block")	
+				}
+				else d3.select("#leafmap").style("z-index",'auto')
+			}, false);		
+		})
+		
+	d3.selectAll(".info-box")
+		.each(function(){
+			this.addEventListener('click', function(evt){evt.stopPropagation()}, false);
+		})
+		
+	d3.select("#fishfilter_export")
+		.on("click",function(){
+			d3.selectAll("span.header-btn").classed("active",false)
+			d3.selectAll(".popup-dialog").style("display","none")
+			d3.select("#leafmap").style("z-index",-1)
+				d3.select(".export-options")
+					.style("display","block")
+			d3.select("#export_execute")
+				.on("click",function(){
+					let exporter = new Exporter(
+						{
+							data: params.fishfilter.filteredData(),
+							export_options: params.export_options["FishFilter"]
+						})
+					console.log(exporter)
+					exporter.doExport()
+				})
+			d3.selectAll(".export_format")
+				.on("click",function(){
+					params.export_options["FishFilter"].filetype = this.value;
+				})
+		})
+		
+	d3.selectAll(".cancel-btn")
+		.each(function(d){
+			this.addEventListener('click', function(evt){
+				d3.select("#leafmap").style("z-index",'auto')
+				d3.selectAll(".popup-dialog").style("display","none");
+				d3.selectAll("span.header-btn").classed("active",false)
+				if(params.fishdata.datasets.length == 0){
+					d3.select(".layer-control")
+						.style("display","block")						
+				}			
+			}, false);		
+		})	
+		
+	d3.selectAll("span.header-btn")	
+		.on("click",function(){
+			let btn = d3.select(this)
+			let classes = btn.attr("class").split(" ")
+			if(classes.includes("active")){
+				btn.classed("active",false)
+				d3.selectAll(".popup-dialog").style("display","none")
+				d3.select("#leafmap").style("z-index",'auto')
+				if(params.fishdata.datasets.length == 0){
+					d3.select(".layer-control")
+						.style("display","block")	
+				}
+				d3.select("#leafmap").style("z-index",'auto')	
+			}
+			else{
+				d3.selectAll("span.header-btn").classed("active",false)
+				d3.selectAll(".popup-dialog").style("display","none")
+				btn.classed("active",true)
+				classes.forEach(function(d){
+					switch(d) {
+					  case "layer-name":
+						d3.select(".layer-control")
+							.style("display","block")
+						break;
+					  case "options-btn":
+						d3.select(".simplify-options")
+							.style("display","block")	
+						break;
+					  case "help-btn":
+						d3.select(".help-options")
+							.style("display","block")	
+						break;
+					  case "about-btn":
+						d3.select(".about-options")
+							.style("display","block")	
+						break;						
+					  default:
+						// do nothing
+					}
+					d3.select("#leafmap").style("z-index",-1)
+				})
+			}
+		})
+	console.log("initPTAGIS completed")
+}
+
+function processQueryString(){
+
+	var urlParams = new URLSearchParams(window.location.search);
+	//can get multiple as follows
+	//console.log(urlParams.getAll('test'))
+	if(urlParams.has('get_attributes')){
+		params.get_attributes = +urlParams.get('get_attributes') ? true : false;
+	}
+	if(urlParams.has('filename')){
+		let filename=urlParams.get('filename')
+		let date = new Date()
+		let file = {
+			name: filename,
+			lastModified: date.getTime(),
+			lastModifiedDate: date,
+			type: "text/csv"
+		}
+		params.progressbar.init()
+		d3.xhr(filename)
+			.on("progress", function(event) {
+				//update progress bar
+				  var percentComplete = Math.round(d3.event.loaded * 100 / d3.event.total);
+				  params.progressbar.updateProgress(d3.event.loaded,d3.event.total,"fetching file")
+			})
+			.get(function (err1, response) {
+				var newfish = new PTAGIS({file: file, processor: params.fishdata, result: response.responseText})
+				params.handlers.process_remote_file()
+				console.log("processQueryString completed")
+			})
+	}
+	else console.log("processQueryString completed")
+}
+
+function initAll(error,intsites,mrrsites,basins_sites){
+	initPTAGIS(intsites,mrrsites,basins_sites);
+	processQueryString();
+}
+
+//*******************************************Starting Ops here
+params.fishdata = new FishFarm()
+
+queue()
+	.defer(d3.csv, 'All Interrogation Sites Table.csv')
+	.defer(d3.csv, 'All MRR Sites Table.csv')
+	.defer(d3.json, 'PTAGIS_Basins_Sites_JSON.txt')
+	.await(initAll);
+
+function uniq(a) {
+    var prims = {"boolean":{}, "number":{}, "string":{}}, objs = [];
+
+    return a.filter(function(item) {
+        var type = typeof item;
+        if(type in prims)
+            return prims[type].hasOwnProperty(item) ? false : (prims[type][item] = true);
+        else
+            return objs.indexOf(item) >= 0 ? false : objs.push(item);
+    });
+}
+
+if (!Array.prototype.includes) {
+  Array.prototype.includes = function(searchElement /*, fromIndex*/ ) {
+    'use strict';
+    var O = Object(this);
+    var len = parseInt(O.length) || 0;
+    if (len === 0) {
+      return false;
+    }
+    var n = parseInt(arguments[1]) || 0;
+    var k;
+    if (n >= 0) {
+      k = n;
+    } else {
+      k = len + n;
+      if (k < 0) {k = 0;}
+    }
+    var currentElement;
+    while (k < len) {
+      currentElement = O[k];
+      if (searchElement === currentElement ||
+         (searchElement !== searchElement && currentElement !== currentElement)) {
+        return true;
+      }
+      k++;
+    }
+    return false;
+  };
+}	
+
+// https://tc39.github.io/ecma262/#sec-array.prototype.findIndex
+if (!Array.prototype.findIndex) {
+  Object.defineProperty(Array.prototype, 'findIndex', {
+    value: function(predicate) {
+     // 1. Let O be ? ToObject(this value).
+      if (this == null) {
+        throw new TypeError('"this" is null or not defined');
+      }
+
+      var o = Object(this);
+
+      // 2. Let len be ? ToLength(? Get(O, "length")).
+      var len = o.length >>> 0;
+
+      // 3. If IsCallable(predicate) is false, throw a TypeError exception.
+      if (typeof predicate !== 'function') {
+        throw new TypeError('predicate must be a function');
+      }
+
+      // 4. If thisArg was supplied, let T be thisArg; else let T be undefined.
+      var thisArg = arguments[1];
+
+      // 5. Let k be 0.
+      var k = 0;
+
+      // 6. Repeat, while k < len
+      while (k < len) {
+        // a. Let Pk be ! ToString(k).
+        // b. Let kValue be ? Get(O, Pk).
+        // c. Let testResult be ToBoolean(? Call(predicate, T, Â« kValue, k, O Â»)).
+        // d. If testResult is true, return k.
+        var kValue = o[k];
+        if (predicate.call(thisArg, kValue, k, o)) {
+          return k;
+        }
+        // e. Increase k by 1.
+        k++;
+      }
+
+      // 7. Return -1.
+      return -1;
+    }
+	});
+
+}
+
+let envirosites = {
+	"234": 
+	[
+		{"sitecode": "BON","name": "Bonneville Forebay","rkm": "235","bank": "Right Bank","location": "Forebay","latitude": 45.64580556,"longitude": -121.9404722,"subbasin_code": 17070105, "datasource": "DART"},
+		{"sitecode": "CCIW","name": "Cascades Island","rkm": "235","bank": "Right Bank","location": "Tailwater","latitude": 45.64588889,"longitude": -121.9464444,"subbasin_code": 17080001, "datasource": "DART"}
+	],
+	"308":
+	[
+		{"sitecode": "TDA","name": "The Dalles Forebay","rkm": "310","bank": "Left Bank","location": "Forebay","latitude": 45.61986111,"longitude": -121.12125,"subbasin_code": 17070105, "datasource": "DART"},
+		{"sitecode": "TDDO","name": "The Dalles Tailwater","rkm": "304","bank": "Left Bank","location": "Tailwater","latitude": 45.60825,"longitude": -121.1899444,"subbasin_code": 17070105, "datasource": "DART"}
+	],
+	"347":
+	[
+		{"sitecode": "JDA","name": "John Day Forebay","rkm": "347","bank": "Right Bank","location": "Forebay","latitude": 45.72052778,"longitude": -120.6946389,"subbasin_code": 17070101, "datasource": "DART"},
+		{"sitecode": "JHAW","name": "John Day Tailwater","rkm": "346","bank": "Right Bank","location": "Forebay","latitude": 45.71341667,"longitude": -120.7108889,"subbasin_code": 17070105, "datasource": "DART"}	
+	],
+	"470":
+	[
+		{"sitecode": "MCN","name": "McNary Forebay","rkm": "470","bank": "Right Bank","location": "Forebay","latitude": 45.94133333,"longitude": -119.2931944,"subbasin_code": 17070101, "datasource": "DART"},
+		{"sitecode": "MCPW","name": "McNary Tailwater","rkm": "468","bank": "Right Bank","location": "Tailwater","latitude": 45.93411111,"longitude": -119.3265278,"subbasin_code": 17070101, "datasource": "DART"}	
+	],
+	"522.016":
+	[
+		{"sitecode": "IHR","name": "Ice Harbor Forebay","rkm": "522.016","bank": "Right Bank","location": "Forebay","latitude": 46.25161111,"longitude": -118.8775,"subbasin_code": 17060110, "datasource": "DART"},
+		{"sitecode": "IDSW","name": "Ice Harbor Tailwater","rkm": "522.010","bank": "Right Bank","location": "Tailwater","latitude": 46.241,"longitude": -118.9538056,"subbasin_code": 17060110, "datasource": "DART"}	
+	],
+	"522.067":
+	[
+		{"sitecode": "LMN","name": "Lower Monumental Forebay","rkm": "522.067","bank": "Mid-River","location": "Forebay","latitude": 46.56255556,"longitude": -118.5345556,"subbasin_code": 17060110, "datasource": "DART"},
+		{"sitecode": "LMNW","name": "Lower Monumental Tailwater","rkm": "522.065","bank": "Right Bank","location": "Tailwater","latitude": 46.55125,"longitude": -118.5497222,"subbasin_code": 17070101, "datasource": "DART"}	
+	],
+	"522.113":
+	[
+		{"sitecode": "LGS","name": "Little Goose Forebay","rkm": "522.113","bank": "Left Bank","location": "Forebay","latitude": 46.583,"longitude": -118.0247778,"subbasin_code": 17060107, "datasource": "DART"},
+		{"sitecode": "LGSW","name": "Little Goose Tailwater","rkm": "522.112","bank": "Right Bank","location": "Tailwater","latitude": 46.58347222,"longitude": -118.0437222,"subbasin_code": 17060107, "datasource": "DART"}	
+	],	
+	"522.173":
+	[
+		{"sitecode": "LWG","name": "Lower Granite Forebay","rkm": "522.173","bank": "Mid-River","location": "Forebay","latitude": 46.6595,"longitude": -117.4263611,"subbasin_code": 17060107, "datasource": "DART"},
+		{"sitecode": "LGNW","name": "Lower Granite Tailwater","rkm": "522.172","bank": "Right Bank","location": "Tailwater","latitude": 46.66613889,"longitude": -117.4386944,"subbasin_code": 17060107, "datasource": "DART"},	
+	],
+	"639":
+	[
+		{"sitecode": "PRD","name": "Priest Rapids Forebay","rkm": "639","bank": "Mid-River","location": "Forebay","latitude": 46.64444444,"longitude": -119.91,"subbasin_code": 17020016, "datasource": "DART"},
+		{"sitecode": "PRXW","name": "Priest Rapids Tailwater","rkm": "637","bank": "Mid-River","location": "Tailwater","latitude": 46.64194444,"longitude": -119.7325,"subbasin_code": 17020016, "datasource": "DART"}	
+	],
+	"669":
+	[
+		{"sitecode": "WAN","name": "Wanapum Forebay","rkm": "669","bank": "Mid-River","location": "Forebay","latitude": 46.87472222,"longitude": -119.9713889,"subbasin_code": 17020010, "datasource": "DART"},
+		{"sitecode": "WANW","name": "Wanapum Tailwater","rkm": "665","bank": "Mid-River","location": "Tailwater","latitude": 46.83361111,"longitude": -119.9422222,"subbasin_code": 17020010, "datasource": "DART"}	
+	],
+	"730":
+	[
+		{"sitecode": "RIS","name": "Rock Island Forebay","rkm": "731","bank": "Right Bank","location": "Forebay","latitude": 47.33972222,"longitude": -120.0941667,"subbasin_code": 17020010, "datasource": "DART"},
+		{"sitecode": "RIGW","name": "Rock Island Tailwater","rkm": "729","bank": "Left Bank","location": "Tailwater","latitude": 47.33027778,"longitude": -120.0813889,"subbasin_code": 17020010, "datasource": "DART"}	
+	],
+	"763":
+	[
+		{"sitecode": "RRH","name": "Rocky Reach Forebay","rkm": "763","bank": "Right Bank","location": "Forebay","latitude": 47.53361111,"longitude": -120.2958333,"subbasin_code": 17020010, "datasource": "DART"},
+		{"sitecode": "RRDW","name": "Rocky Reach Tailwater","rkm": "760","bank": "Mid-River","location": "Tailwater","latitude": 47.47111111,"longitude": -120.3166667,"subbasin_code": 17020010, "datasource": "DART"}	
+	],
+	"830":
+	[
+		{"sitecode": "WEL","name": "Wells Forebay","rkm": "829","bank": "","location": "Forebay","latitude": 47.94166667,"longitude": -119.8591667,"subbasin_code": 17020005, "datasource": "DART"},
+		{"sitecode": "WELW","name": "Wells Tailwater","rkm": "824","bank": "Left Bank","location": "Tailwater","latitude": 47.90777778,"longitude": -119.8908333,"subbasin_code": 17020005, "datasource": "DART"}	
+	],		
+}
+
+let project = {
+	reqs:[
+	
+	],
+	modules:[
+		{class: "FishFilter"},
+		{class: "FishTracks"},
+		
+	
+	]
+}
+
+class FishSummary{
+	constructor(opts){
+		let _this = this;
+		this.fish = params.fishfilter.detectionsDim.top(Infinity);
+		this.events = [];
+		this.fish.forEach(function(fish){
+			fish.events.forEach(function(event){
+				_this.events.push({
+					tag_code: fish.tag_code,
+					rel_site: fish.rel_site,
+					run: fish.run_name,
+					rtype: fish.rtype,
+					type: event.type,
+					site: event.site,
+					date: event.date,
+					latitude: params.sitemap[event.site].latitude,
+					longitude: params.sitemap[event.site].longitude,
+					location: d3.format(".1f")(params.sitemap[event.site].latitude) + ":" + d3.format(".1f")(params.sitemap[event.site].longitude)
+				});
+			})
+		})
+	}
+	
+	filterByDate(daterange){
+		return this;
+	}
+	
+	groupBySite(type,sitevar,fishvar){
+		let nest = d3.nest()
+			.key(function(d){return params.sitemap[d.site][sitevar]})
+			.key(function(d){return d.getFish()[fishvar]})
+			.key(function(d){return d.getFish().tag_code})
+			.entries(this.events.filter(function(d){return d.type==type}))	
+			params.test = nest
+	}
+
+	groupByLocation(type,fishvar){
+		let nest = d3.nest()
+			.key(function(d){return params.sitemap[d.site].latitude + ":" + params.sitemap[d.site].longitude })
+			.key(function(d){return d.getFish()[fishvar]})
+			.key(function(d){return d.getFish().tag_code})
+			.entries(this.events.filter(function(d){return d.type==type}))	
+			params.test = nest
+	}	
+	
+}	
+
+class PointsGeoJSON{
+	constructor(){
+		this.geojson = 
+		{
+			type: "FeatureCollection",
+			features: []
+		}
+	}
+	
+	addPoint(latitude,longitude,datum){
+		let point = 
+		{
+			geometry: {"type": "Point", "coordinates": [longitude,latitude]},
+			type: "Feature",
+			properties: {}
+		}
+
+		Object.keys(datum).forEach(function(d){
+			point.properties[d] = datum[d]
+		})
+
+		this.geojson.features.push(point)
+	}
+}
+
+class ClusterPieLayer{
+	constructor(options){
+		let _this = this;
+		this.map = options.map;
+		this.data = options.data;
+		this.palette = options.palette ? options.palette : "YlOrBr";
+		this.rscale = options.rscale ? options.rscale : d3.scale.threshold().domain([10,100,1000]).range([12,8,4,0])
+		this.strokeWidth = options.strokeWidth ? options.strokeWidth : 1;
+		this.categoryField = options.categoryField ? options.categoryField : "type";
+		this.rmax = this.rmax ? this.rmax : 40;
+		this.labels = []
+		this.label_params = {
+			LabelLayer: null,
+			labelwidth: 200,
+			labelsize: 24,
+			labelcolor: "#000000",
+		}		
+				
+		this.colormaps=
+			{
+				rtype: {W: 3, H: 2, U: 1},
+				run_name: {"Fall": 1,"Spring": 2,"Summer": 3,"Unknown": 4},
+				species: {"Bull Trout": 1,"Chinook": 2, "Coho": 3, "Cutthroat Trout": 4, "Sockeye": 5, "Steelhead": 6},
+				type: {Mark: 7,Release: 6, Observation: 5, Recapture: 4, "Passive Recapture": 3, Recovery: 2, Measure: 1}, 
+				event_order: {first: 1,inner: 2, last: 3},
+				release_basin: {
+					"Lower Columbia": 1,
+					"Deschutes": 2,
+					"John Day": 3,					
+					"Middle Columbia": 4,
+					"Lower Snake": 5,
+					"Clearwater": 6,
+					"Salmon": 7,
+					"Yakima": 8,
+					"Upper Columbia": 9	
+				},
+				basin_status: {false: 1, true: 2}
+			}
+			
+		d3.select("#pie_palette_options")
+			.on("change",function(){
+				_this.palette = this.options[this.selectedIndex].value
+				_this.update()
+			})
+			
+		this.legend_lookup = {}
+		
+		d3.select("#pie_event_variable").selectAll("option").each(function(){
+			let key = this.value; 
+			let value = d3.select(this).html();
+			_this.legend_lookup[key] = value})
+			
+		d3.select("#pie_enviro_variable").selectAll("option").each(function(){
+			let key = this.value; 
+			let value = d3.select(this).html();
+			_this.legend_lookup[key] = value})			
+		
+		this.init();	
+	}
+	
+	update(){
+		console.log("updating pies")
+		this.map.removeLayer(this.eventLayer)
+		this.init()
+	}
+	
+	init(){
+		var progress = document.getElementById('map_progress');
+		var progressBar = document.getElementById('map_progress-bar');	
+		function updateProgressBar(processed, total, elapsed, layersArray) {
+			console.log("called")
+			if (elapsed > 1000) {
+				// if it takes more than a second to load, display the progress bar:
+				progress.style.display = 'block';
+				progressBar.style.width = Math.round(processed/total*100) + '%';
+			}
+
+			if (processed === total) {
+				// all markers processed - hide the progress bar:
+				progress.style.display = 'none';
+			}
+		}	
+		let starttime = new Date()
+		let runtime = 0
+		let _this = this;
+		this.eventLayer = L.markerClusterGroup({
+		  maxClusterRadius: 2*this.rmax,
+		  zoomToBoundsOnClick: false,
+		  spiderfyOnMaxZoom: false,
+		  //from https://github.com/Leaflet/Leaflet.markercluster/blob/master/example/marker-clustering-realworld.50000.html
+		  chunkedLoading: true,
+		  chunkProgress: updateProgressBar, 
+		  iconCreateFunction: this.defineClusterIcon.bind(this) //this is where the magic happens
+		})
+		
+		function getFish(children){
+			let fish = {}, fisharray = []
+			children.forEach(function(d){
+				fish[d.feature.properties.tag_code] = d.feature.properties.getFish()
+			})
+			Object.keys(fish).forEach(function(d){
+				fisharray.push(fish[d])
+			})
+			return fisharray
+		}
+		
+		this.eventLayer
+			.on('clusterclick', function (a) {
+					// a.layer is actually a cluster
+				var children = a.layer.getAllChildMarkers(),
+				data = d3.nest() //Build a dataset for the pie chart
+				  .key(function(d) { return d.feature.properties.site; })
+				  .entries(children)
+				console.log(data)
+				_this.addLabel(a,data)
+				params.fishfilter.setSelectedData(getFish(children))
+			})
+			.on('click',function (a){
+				console.log(a)
+				_this.addLabel(a,[{key: a.layer.feature.properties.site, values: [a.layer]}])
+				params.fishfilter.setSelectedData(getFish([a.layer]))
+			});
+		
+		runtime = new Date() - starttime - runtime;
+		console.log("created eventLayer in " + (runtime/1000) + " seconds")
+		let eventsGeoJSON = new PointsGeoJSON();
+		this.data().forEach(function(d){
+			eventsGeoJSON.addPoint(d.latitude,d.longitude,d)
+		})
+		runtime = new Date() - starttime - runtime;
+		console.log("created geoJSON in " + (runtime/1000) + " seconds")
+		this.geoJSONLayer = L.geoJson(eventsGeoJSON.geojson,{
+			pointToLayer: this.defineEventFeature.bind(this)			
+          });
+		runtime = new Date() - starttime - runtime;
+		console.log("created geoJSON Layer in " + (runtime/1000) + " seconds")
+		Object.keys(this.geoJSONLayer._layers).forEach(function(d){
+			_this.eventLayer.addLayer(_this.geoJSONLayer._layers[d])
+		})
+		//this.eventLayer.addLayer(this.geoJSONLayer)
+		runtime = new Date() - starttime - runtime;
+		console.log("Layer added to eventLayer in " + (runtime/1000) + " seconds")
+		this.map.addLayer(this.eventLayer)	
+		runtime = new Date() - starttime - runtime;
+		console.log("Added to map in " + (runtime/1000) + " seconds")
+		this.doLegend()
+	}
+	
+	addLabel = function(obj,data){
+		let cluster = obj.layer
+		var lat = obj.latlng.lat;
+		var lon = obj.latlng.lng;
+		var leafmap = this.map//.addLayer(this.eventLayer)
+		var html, words;
+		
+		let label = ""
+		data.forEach(function(d,i){
+			label += d.key
+			if(i<data.length-1)label += "<br/>"
+		})
+		
+		html = "<table class='sitelabeltable'><tr><td align='left' class='sitelabel'>" + label + "</td></tr></table>"
+		
+		var divIcon = L.divIcon({ 
+		html: html,
+		className: "sitelabel",
+		draggable: true,
+		color: "black"
+		})
+		
+		var marker = L.marker(new L.LatLng(lat, lon), {icon: divIcon })
+		//this.labels.push(marker)
+		leafmap.addLayer(marker)
+		//params.HUC.LabelLayer.addLayer(marker);
+			// Disable dragging when user's cursor enters the element
+		marker.addEventListener('mouseover', function () {
+			leafmap.dragging.disable();
+			marker.dragging.enable();
+		});
+		
+		marker.on('dragend', function(e) {
+
+		});
+
+	// Re-enable dragging when user's cursor leaves the element
+		marker.addEventListener('mouseout', function () {
+			leafmap.dragging.enable();
+		});
+		
+		marker.addEventListener('click', function () {
+			leafmap.removeLayer(marker);
+			leafmap.dragging.enable();
+		});		
+		
+		d3.selectAll(".sitelabeltable").style("color",this.label_params.labelcolor)
+		d3.selectAll(".sitelabeltable td").style("font-size",this.label_params.labelsize)
+	}
+	
+	defineEventFeature(feature, latlng) {
+		let _this = this;
+		let getClass = function(){return "marker " +  _this.palette + "-q" + (_this.colormaps[_this.categoryField][feature.properties[_this.categoryField]]-1) + "-" + (Object.keys(_this.colormaps[_this.categoryField]).length);}
+	    var categoryVal = feature.properties[this.categoryField]
+		//iconVal = feature.properties[iconField];
+		var myClass = 'marker category-'+ categoryVal// +' icon-'+iconVal;
+		var myIcon = L.divIcon({
+			className: getClass(),
+			iconSize:null
+		});
+		let marker = L.marker(latlng, {icon: myIcon}).bindTooltip(feature.properties[_this.categoryField] + " (1)", {direction: "right"});
+		return marker;	
+	}
+
+	defineClusterIcon(cluster) {
+		let _this = this;
+		var children = cluster.getAllChildMarkers(),
+        data = d3.nest() //Build a dataset for the pie chart
+          .key(function(d) { return d.feature.properties[_this.categoryField]; })
+		  .sortKeys(function(a,b){return _this.colormaps[_this.categoryField][a] - _this.colormaps[_this.categoryField][b]})
+		  .key(d => {return d.feature.properties.tag_code})
+          .entries(children)
+		  
+        var n = d3.sum(data,d=>{return d.values.length}), //Get number of markers in cluster
+		r = this.rmax-2*this.strokeWidth-this.rscale(n), //Calculate clusterpie radius...
+        iconDim = (r+this.strokeWidth)*2, //...and divIcon dimensions (leaflet really want to know the size)
+		  
+        //bake some svg markup
+        html = this.bakeThePie({data: data,
+			valueFunc: function(d){return d.values.length;},
+			strokeWidth: 1,
+			outerRadius: r,
+			innerRadius: r-20,
+			pieClass: 'cluster-pie',
+			pieLabel: n,
+			pieLabelClass: 'marker-cluster-pie-label',
+			pathClassFunc: function(d){return _this.palette + "-q" + (_this.colormaps[_this.categoryField][d.data.key]-1) + "-" + (Object.keys(_this.colormaps[_this.categoryField]).length);},
+			pathTitleFunc: function(d){return d.data.key +' ('+d.data.values.length + ')';}
+        }),
+        //Create a new divIcon and assign the svg markup to the html property
+        myIcon = new L.DivIcon({
+            html: html,
+            className: 'marker-cluster', 
+            iconSize: new L.Point(iconDim, iconDim)
+        });
+    return myIcon;
+	}
+
+
+	bakeThePie(options) {
+		let _this = this;
+		/*Helper function*/
+		function serializeXmlNode(xmlNode) {
+			if (typeof window.XMLSerializer != "undefined") {
+				return (new window.XMLSerializer()).serializeToString(xmlNode);
+			} else if (typeof xmlNode.xml != "undefined") {
+				return xmlNode.xml;
+			}
+			return "";
+		}
+		
+		/*data and valueFunc are required*/
+		if (!options.data || !options.valueFunc) {
+			return '';
+		}
+		var data = options.data,
+			valueFunc = options.valueFunc,
+			r = options.outerRadius?options.outerRadius:28, //Default outer radius = 28px
+			rInner = options.innerRadius?options.innerRadius:r-20, //Default inner radius = r-10
+			strokeWidth = options.strokeWidth?options.strokeWidth:1, //Default stroke is 1
+			pathClassFunc = options.pathClassFunc?options.pathClassFunc:function(){return '';}, //Class for each path
+			pathTitleFunc = options.pathTitleFunc?options.pathTitleFunc:function(){return '';}, //Title for each path
+			pieClass = options.pieClass?options.pieClass:'marker-cluster-pie', //Class for the whole pie
+			pieLabel = options.pieLabel?options.pieLabel:d3.sum(data,valueFunc), //Label for the whole pie
+			pieLabelClass = options.pieLabelClass?options.pieLabelClass:'marker-cluster-pie-label',//Class for the pie label
+			
+			origo = (r+strokeWidth), //Center coordinate
+			w = origo*2, //width and height of the svg element
+			h = w,
+			donut = d3.layout.pie(),
+			arc = d3.svg.arc().innerRadius(rInner).outerRadius(r);
+			
+		//Create an svg element
+		var svg = document.createElementNS(d3.ns.prefix.svg, 'svg');
+		//Create the pie chart
+		var vis = d3.select(svg)
+			.data([data])
+			.attr('class', pieClass)
+			.attr('width', w)
+			.attr('height', h);
+			
+		vis
+			.append('circle')
+			.attr('cx', origo)
+			.attr('cy', origo)
+			.attr('r', rInner)
+			.style('fill', 'white');	
+			
+		var arcs = vis.selectAll('g.arc')
+			.data(donut.value(valueFunc).sort(function(a,b){return _this.colormaps[_this.categoryField][a] - _this.colormaps[_this.categoryField][b]}))
+			.enter().append('svg:g')
+			.attr('class', 'arc')
+			.attr('transform', 'translate(' + origo + ',' + origo + ')');
+		
+		arcs.append('svg:path')
+			.attr('class', pathClassFunc)
+			.attr('stroke-width', strokeWidth)
+			.attr('d', arc)
+			.append('svg:title')
+			  .text(pathTitleFunc);
+					
+		vis.append('text')
+			.attr('x',origo)
+			.attr('y',origo)
+			.attr('class', pieLabelClass)
+			.attr('text-anchor', 'middle')
+			//.attr('dominant-baseline', 'central')
+			/*IE doesn't seem to support dominant-baseline, but setting dy to .3em does the trick*/
+			.attr('dy','.3em')
+			.text(pieLabel);
+		//Return the svg-markup rather than the actual element
+		return serializeXmlNode(svg);
+	}
+	
+	doLegend(options){
+		let _this = this;
+		let colorclass = function(d){return _this.palette + "-q" + (_this.colormaps[_this.categoryField][d.name]-1) + "-" + (Object.keys(_this.colormaps[_this.categoryField]).length);}		
+		var legend = d3.select("#pie_legend");
+			legend.selectAll("svg").remove();
+		let exists = {}
+		d3.nest().key(d => {return d[_this.categoryField]}).entries(this.data()).forEach(d => {exists[d.key]=true})
+		var data = [];
+		var maxlength = 0;
+		Object.keys(this.colormaps[this.categoryField]).forEach(function(d){
+			if(exists[d]){
+				data.push({name: d, value: _this.colormaps[_this.categoryField][d]})
+				maxlength = d.length > maxlength ? d.length : maxlength;
+			}	
+		})
+		let title = this.legend_lookup[this.categoryField];
+		//maxlength = title.length > maxlength ? title.length : maxlength;
+		var offset = 20		
+		var height = data.length*18 + 3 + offset;
+		var width = maxlength*7 + 50;
+			var svg = legend.append("svg")
+				.attr("height", height)
+				.attr("width", width)
+			
+			svg.append("rect")
+				.attr("x",0)
+				.attr("y",0)
+				.attr("height", height)
+				.attr("width", width)
+				.style("fill","white")
+				
+			svg.append("g")
+				.attr("transform",function(d,i){
+					return "translate(5,15)"
+				})
+				.append("text")
+				.text(title)
+				.style("font-size",14)
+				.style("font-weight","bold")
+				
+			svg	
+				.selectAll(".pieslice")
+				.data(data)
+				.enter()
+				.append("g")
+				.attr("class","pieslice")
+				.attr("transform",function(d,i){
+					return "translate(2," + (i*18+3 + offset) + ")"
+				})
+			svg	
+				.selectAll(".pieslice")
+				.append("rect")
+				.attr("x",0)
+				.attr("y",0)
+				.attr("height", 10)
+				.attr("width", 30)
+				.attr("class",colorclass)
+		
+			svg	
+				.selectAll(".pieslice")
+				.append("text")
+				.attr("transform","translate(35,10)")
+				.text(function(d){return d.name})
+				.style("font-size",14)
+				
+			svg
+				.on("mouseover", function() {
+
+				})                  
+				.on("mouseout", function() {       
+
+				});		
+	}		
+}
+
+class EnviroEvent{
+	constructor(options){
+		this.variable = options.variable ? options.variable : "Temperature (C)";
+		this.datasource = options.datasource ? options.datasource : "DART";
+		this.frequency = options.frequency ? options.frequency : "hourly";
+		this.sitemap = options.sitemap;
+		this.scales = {
+			"Temperature (C)": d3.scale.threshold().domain([10,12,14,16,18,20,22]).range(["< 10","10-12","12-14","14-16","16-18","18-20","20-22","> 22"]),
+			"Dissolved Gas Percent (%)": d3.scale.threshold().domain([90,100,110,115,120,125]).range(["< 90","90-100","100-110","110-115","115-120","120-125","> 125"]),
+			"Spill Percent (%)": d3.scale.threshold().domain([10,20,30,40,50,60,70,80]).range(["< 10","10-20","20-30","30-40","40-50","50-60","60-70","70-80","> 80"])			
+		}
+	}
+	
+	getValue(datum){
+		return this.scales[this.variable](+datum[this.variable])
+	}
+	
+	getColorMap(){
+		let scale = []
+		this.scales[this.variable].range().forEach(function(d,i){scale[d] = i+1})
+		return scale;
+	}
+	
+	//takes parent event and creates one or more child events of type=Measure
+	getEvents(event){
+		let _this = this;
+		let events = [];//array of events to return
+		let edata = event.edata.filter(d => {return d.Source == _this.datasource & d.Freq == _this.frequency})
+		if(edata.length == 0) return [];
+		else{
+			edata.forEach(edatum => {
+				let evnt = {
+				}
+				let fish = event.getFish()
+				Object.keys(fish).forEach(function(d){
+					if(!Array.isArray(fish[d]))evnt[d] = fish[d]
+				})
+				Object.keys(event).forEach(function(d){
+					if(!Array.isArray(event[d]))evnt[d] = event[d]
+				})	
+				evnt.site = "USACE-" + edatum.Project;
+				evnt.type = "Measure"
+				let esite = _this.sitemap[event.site].envirosites.filter(esite => {return esite.sitecode == edatum.Project})
+				if(esite.length > 0){
+					evnt.latitude = esite[0].latitude;
+					evnt.longitude = esite[0].longitude;
+				}
+				evnt.site_basin = params.hucnames[_this.sitemap[event.site].basin_code] ?  params.hucnames[_this.sitemap[event.site].basin_code].name : "Unknown";
+				//console.log(event)
+				//console.log(evnt)				
+				evnt.release_basin = params.hucnames[_this.sitemap[evnt.rel_site].basin_code] ?  params.hucnames[_this.sitemap[evnt.rel_site].basin_code].name : "Unknown";
+				evnt.basin_status = evnt.site_basin == evnt.release_basin ? true : false;
+				evnt.basin_status = evnt.site_basin == "Unknown" ? false : evnt.basin_status;
+				evnt.event_order = "inner";
+				//Object.keys(edatum).forEach(d => {evnt[d] = edatum[d]})
+				evnt.edata = edatum;
+				
+				let opts = document.getElementById("pie_enviro_variable").options;
+				for(var i=0;i<opts.length;i++)evnt[opts[i].value] = this.scales[opts[i].value](+edatum[opts[i].value])
+				
+				events.push(evnt);
+			})
+		}
+		return events;
+	}
+}
+</script>
+<!--
+ToDo list
+
+1) redo fishtracks using Canvas
+	https://medium.com/@xoor/implementing-charts-that-scale-with-d3-and-canvas-3e14bbe70f37
+	https://xoor.io/en/blog/mastering-d3-js-part-3-brush-and-zoom/
+	https://xoor-io.github.io/d3-canvas-example/03_scatterplot_with_box_zoom/index.html
+	
+2) make fishfilter customized
+	a) if single-valued, only display that value (as text)
+	b) collapseable
+	c) add scrolling
+	d) export values to CSV
+	
+3) a way to clear data (without reloading)
+
+
+-->
