@@ -31,351 +31,18 @@
   <script src="https://unpkg.com/leaflet.markercluster@1.4.1/dist/leaflet.markercluster.js"></script>
 
 
-  <script type="text/javascript" src="map_utils2.js"></script>
   <script type="text/javascript" src="/script/CBMap.js"></script>
   <script type="text/javascript" src="PTAGIS_Names.js"></script>
   <script type="text/javascript" src="transport_dates.js"></script>
   <script type="text/javascript" src="/script/jszip.js"></script>  
-  <script type="text/javascript" src="/script/pithy.js"></script>  
+  <script type="text/javascript" src="pithy.js"></script>  
   <link rel="stylesheet" href="PITtool.css"/>
   <link rel="stylesheet" href="PITtool_elements.css"/>
   <link rel="stylesheet" href="/script/piemarkers.css" />  
   <link rel="stylesheet" href="/script/colorbrewer.css" />
+  <link rel="stylesheet" href="pithy.css" />
 <style>
-#map_progress {
-    display: none;
-    position: absolute;
-    z-index: 1000;
-    left: 400px;
-    top: 300px;
-    width: 200px;
-    height: 20px;
-    margin-top: -20px;
-    margin-left: -100px;
-    background-color: #fff;
-    background-color: rgba(255, 255, 255, 0.7);
-    border-radius: 4px;
-    padding: 2px;
-}
 
-#map_progress-bar {
-    width: 0;
-    height: 100%;
-    background-color: #76A6FC;
-    border-radius: 4px;
-}
-
-.tip {
-	width: 300px;
-}
-
-p.help_text{
-	font-size: 16;
-	max-width: 600px;
-}
-
-.leaflet-popup-content { width:500px; }	
-img.leaflet-tile{
-	pointer-events: none;
-}
-.action_marker{
-	pointer-events: all;
-	cursor: pointer;
-}	
-#leafmap{
-	width: 950px;
-	height: 650px;
-}
-
-#spinner * { 
-	filter: none; 
-	-moz-opacity: 100%; 
-	position: absolute;
-	top: 200px;
-	left: 650px;
-}
-
-input.fileinput{
-    display: none;
-}
-	
-table {
-	margin: 10px;
-	padding-top: 2px;
-    padding-right: 10px;
-    padding-bottom: 2px;
-    padding-left: 10px;
-}
-
-#drop_zone {
-  border: 2px dashed #bbb;
-  -moz-border-radius: 5px;
-  -webkit-border-radius: 5px;
-  border-radius: 5px;
-  padding: 25px;
-  text-align: center;
-  font: 20pt bold 'Vollkorn';
-  color: #bbb;
-}
-.thumb {
-  height: 75px;
-  border: 1px solid #000;
-  margin: 10px 5px 0 0;
-}
-#progress_bar {
- 
-  width: 100%;
-  padding: 3px;
-  border: 1px solid #000;
-  font-size: 14px;
-  clear: both;
-  opacity: 0;
-  -o-transition: opacity 1s linear;
-  -moz-transition: opacity 1s linear;
-  -webkit-transition: opacity 1s linear;
-  -ms-transition: opacity 1s linear;
-}
-#progress_bar.loading {
-  opacity: 1.0;
-}
-
-#progress_bar.loaded {
-  opacity: 0;
-}
-
-#progress_bar .percent {
-  background-color: #99ccff;
-  height: auto;
-  width: 0;
-}
-#byte_content {
-  margin: 5px 0;
-  max-height: 100px;
-  overflow-y: auto;
-  overflow-x: hidden;
-}
-#byte_range {
-  margin-top: 5px;
-}
-
-svg	{ overflow: hidden; }
-	
-	table {
-	margin: 10px;
-	padding-top: 2px;
-    padding-right: 10px;
-    padding-bottom: 2px;
-    padding-left: 10px;
-	}
-	
-.dc-table-label {
-font-weight: bold;
-}
-
-.header th {
-text-align: center;	
-}
-
-.tiptable {
-	font: 12px sans-serif;
-}
-
-.axis path, .axis line {
-    fill: none;
-    shape-rendering: crispedges;
-    stroke: #000000;
-}
-.grid .tick {
-    stroke: grey;
-    opacity: 0.5 !important;
-}
-.bar rect {
-        fill: #ed1e79;
-    }
-
-.bar text.value {
-	fill: black;
-}
-circle {
-    fill: none;
-    stroke: black; 
-    stroke-width: 1;
-}
-
-.brush .extent {
-  stroke: #fff;
-  fill-opacity: .125;
-  shape-rendering: crispEdges;
-}
-
-div.tooltip {   
-  position: absolute;           
-  text-align: left;                            
-  padding: 2px;             
-  font: 16px sans-serif;        
-  background: #ccc;   
-  border: 0px;      
-  border-radius: 8px;           
-  pointer-events: none;         
-}
-
-text {
-  cursor: default;
-}
-
-path.line:hover{
-	stroke-width: 2px;
-}
-
-.background path {
-  fill: none;
-  stroke: #ddd;
-  shape-rendering: crispEdges;
-}
-
-.foreground path {
-  fill: none;
-  stroke: steelblue;
-}
-
-.brush .extent {
-  fill-opacity: .3;
-  stroke: #fff;
-  shape-rendering: crispEdges;
-}
-
-.axis line,
-.axis path {
-  fill: none;
-  stroke: #000;
-  shape-rendering: crispEdges;
-}
-
-.axis text {
-  text-shadow: 0 1px 0 #fff, 1px 0 0 #fff, 0 -1px 0 #fff, -1px 0 0 #fff;
-  cursor: move;
-}
-
-input[type=range],
-	::-moz-range-track,
-	 ::-ms-track {
-	 -webkit-appearance: none;
-	 background-color: 3f91e5;
-	 width: 250px;
-	 height:40px;
-}
-
-input.vertical {
-	-webkit-appearance: slider-vertical;
-	writing-mode: bt-lr;
-}
-
-
-table td select{
-	font-size: smaller;
-}
-.dropdown_text, select{
-	font-size: 14px;
-}
-a {
-	color: black;
-	font-weight: bold;
-}
-select {
-	height: 26px;
-}
-
-.checkbox-dropdown {
-
-    width: 150px;
-    border: 1px solid silver;
-    cursor: pointer; /* use correct mouse pointer when hovering over the dropdown */
-    padding: 1px;
-    position: relative;
-    margin: 0 auto;
-    -webkit-touch-callout: none;
-    -webkit-user-select: none;
-    -khtml-user-select: none;
-    -moz-user-select: none;
-    -ms-user-select: none;
-    user-select: none;
-}
-
-/* Display CSS arrow to the right of the dropdown text */
-.checkbox-dropdown:after {
-    content:'';
-    height: 0;
-    position: relative;
-    width: 0;
-    border: 6px solid transparent;
-    border-top-color: #000;
-    top: 0px;
-    right: 0px;
-
-    content: "";
-    width: 0;
-    height: 0;
-    position: absolute;
-    right: -15px;
-    top: 50%;
-    margin-top: -6px;
-    border-width: 6px 0 6px 6px;
-    border-style: solid;
-    border: 6px solid transparent;
-    border-top-color: #000; 	
-}
-
-/* Reverse the CSS arrow when the dropdown is active */
-.checkbox-dropdown.is-active:after {
-    border-bottom-color: #000;
-    border-top-color: #fff;
-    margin-top: -9px;
-}
-
-.checkbox-dropdown-list {
-	width: 150px;
-	background-color: aliceblue;
-    list-style: none;
-    margin: 0;
-    padding: 0;
-    position: absolute;
-    top: 100%; /* align the dropdown right below the dropdown text */
-    border: inherit;
-    border-top: none;
-    left: -1px; /* align the dropdown to the left */
-    right: -1px; /* align the dropdown to the right */
-    opacity: 0; /* hide the dropdown */
-    -webkit-transition: opacity 0.1s ease-in-out;
-    -moz-transition: opacity 0.1s ease-in-out;
-    -o-transition: opacity 0.1s ease-in-out;
-    -ms-transition: opacity 0.1s ease-in-out;
-    transition: opacity 0.1s ease-in-out;
-    pointer-events: none; /* avoid mouse click events inside the dropdown */
-}
-.is-active .checkbox-dropdown-list {
-    opacity: 1; /* display the dropdown */
-    pointer-events: auto; /* make sure that the user still can select checkboxes */
-}
-
-.checkbox-dropdown-list li label {
-    display: block;
-	margin-top: 5px;
-    border-bottom: 1px solid silver;
-    padding: 0px;
-    -webkit-transition: all 0.2s ease-out;
-    -moz-transition: all 0.2s ease-out;
-    -o-transition: all 0.2s ease-out;
-    -ms-transition: all 0.2s ease-out;
-    transition: all 0.2s ease-out;
-}
-
-.checkbox-dropdown-list li label:hover {
-
-}
-
-li{
-	margin-left: 5px;
-}
 
 </style>
 <div id="spinner"><img src="/images/spinner.gif"></div>
@@ -383,7 +50,7 @@ li{
 	<div class="pithy-logo"><h3 class="pithy-text">PIT<span class="logo-highlight">hy</span></h3></div>
 	<div class="layer-control-btn"><span class="btn header-btn layer-name"></span></div>
 	<div id="mode-buttons" class="page-header-buttons" style="display: block;">
-		</span><span class="options-btn header-btn btn">Options</span><span class="separator"></span><span class="help-btn header-btn btn">Help</span><span class="separator"></span><span class="about-btn header-btn btn">About</span>
+		<span class="options-btn header-btn btn">Options</span><span class="separator"></span><span class="help-btn header-btn btn">Help</span><span class="separator"></span><span class="about-btn header-btn btn">About</span>
 	</div>
 </div>
 <div class="layer-control main-area popup-dialog">
@@ -472,7 +139,7 @@ Although the eventual goal for this tool is to be able to process results from s
 If you are now familiar with PTAGIS, it is first necessary to register as a user and enter the Advanced Reporting module. 
 </p>
 <p class="help_text">
-<img src = "Required-PTAGIS-Attrs.png" align = "left" border="0" margin="5"/><br/>
+<img src = "img/Required-PTAGIS-Attrs.png" align = "left" border="0" margin="5"/><br/>
 Shown at left is an optimal set of attributes for a Complete Tag History query. PIThy is designed to work with results at the individual tag level (Tag attribute thus is mandatory), corresponding to a single fish with a known release date and time, and a series of events which are also tracked in time and location.<br>
 Many of the fish-specific attributes are not strictly required, including species, run, and rear type, but if the result set will include multiple types of these, including them will permit filtering by them in the tool. Length is also not required, but can be useful for certain analyses.
 </p>
@@ -485,7 +152,7 @@ If you wish to have associated environmental variables automatically loaded from
 <p class="help_text">
 <em><b>Saving Files</b></em><br>
 To export data and metadata from PIThy, click on the download icon at top of the FishFilter (as shown below, highlighted in yellow). A window will appear to the right offering a choice between formats. Only the (fish) data chosen using the FishFilter is prepared for the export.
-<img src = "Saving-Files.png" border="0" margin="5"/><br/>
+<img src = "img/Saving-Files.png" border="0" margin="5"/><br/>
 </p>
 <p class="help_text">
 More help is on the way...
@@ -527,6 +194,9 @@ PIThy is currently in an early development stage and feedback is welcome. This p
 
 			<div><label><input type="radio" name="export_format" id="csv-zip" value="csv-zip" class="radio export_format">Zipped CSV files</label><div class="tip-button">?<div class="tip-anchor">
 			<div class="tip">Zip-compressed CSV files.</div></div></div></div>
+			
+			<div><label><input type="radio" name="export_format" id="csv-raw" value="csv-raw" class="radio export_format">PTAGIS Raw</label><div class="tip-button">?<div class="tip-anchor">
+			<div class="tip">PTAGIS Raw CSV.</div></div></div></div>			
 
 		</div> <!-- option menu -->		
 		<div>
@@ -550,7 +220,7 @@ PIThy is currently in an early development stage and feedback is welcome. This p
 	</div>
 	<div class="row">
 		<div class="span5 fishfilter" style="visibility: hidden; border-right-style: groove">
-			<span class = "mod-title fishfilter">Fish Filter</span>&nbsp;<span class="help-icon">?</span>&nbsp;<img class="download-icon" src="download.png" id="fishfilter_export" style="cursor: pointer;">
+			<span class = "mod-title fishfilter">Fish Filter</span>&nbsp;<span class="help-icon">?</span>&nbsp;<img class="download-icon" src="img/download.png" id="fishfilter_export" style="cursor: pointer;">
 			<hr class="mod-title"/>
 		</div>	
 	</div>
@@ -805,7 +475,8 @@ PIThy is currently in an early development stage and feedback is welcome. This p
 			FishFilter: {
 				attributes: true,
 				metadata: true,
-				filetype: "json"	
+				filetype: "json",
+				name_lookup: PTAGIS_name_lookup
 			}
 		},
 	handlers:
@@ -1137,7 +808,6 @@ function initPTAGIS(intsites,mrrsites,basins_sites){
 							data: params.fishfilter.filteredData(),
 							export_options: params.export_options["FishFilter"]
 						})
-					console.log(exporter)
 					exporter.doExport()
 				})
 			d3.selectAll(".export_format")

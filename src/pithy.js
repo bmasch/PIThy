@@ -1,3 +1,28 @@
+L.Control.Legend = L.Control.extend({
+	options: {
+        position: 'topleft',
+        collapsed: false,
+		id: "legend_id",
+		width: '200px',
+		type: "line"
+    },
+    onAdd: function(map) {
+        var div = L.DomUtil.create('div');
+		div.id = this.options.id
+        div.style.width = this.options.width
+		div.style.border = '2px; solid; rgba(0,0,0,0.2)';
+        return div;
+    },
+
+    onRemove: function(map) {
+        // Nothing to do here
+    }
+});
+
+L.control.legend = function(opts) {
+    return new L.Control.Legend(opts);
+}
+
 class CompPanel{
 	constructor(options){
 		if (!options.target) {
@@ -2207,7 +2232,7 @@ class PTAGIS{
 			var namemap = ptagis[d];
 			if(!namemap)console.log(header)
 			newheader.push(namemap.Clean)
-			PTAGIS_vars[namemap.Clean] = {PTAGIS: namemap.PTAGIS, Format: namemap.Format, Level: namemap.Level}
+			PTAGIS_vars[namemap.Clean] = {PTAGIS: d, Format: namemap.Format, Level: namemap.Level}
 		})
 		this.PTAGIS_vars = PTAGIS_vars;
 		return newheader;
@@ -2274,6 +2299,8 @@ class Exporter {
 		this.target = args.target ? args.target : ".export-options";
 		this.data = args.data
 		this.export_options = args.export_options
+		this.dateFormat1 = d3.time.format("%m/%d/%Y");
+		this.dateFormat2 = d3.time.format("%m/%d/%Y %H:%M:%S %p");
 	}
 	
 	doExport(){
@@ -2286,7 +2313,8 @@ class Exporter {
 		}
 		var json, csv, blob;
 		let filters = params.fishfilter.filtersApplied()
-		let metadata = params.fishdata.getMetadata()
+		let metadata = params.fishdata.getMetadata();
+		let _this = this;
 		switch (this.export_options.filetype) {
 			case 'json':
 			  json = {
@@ -2330,7 +2358,6 @@ class Exporter {
 				})
 			  })
 			  let headers = Object.keys(arr[0])
-			  console.log(arr)
 			  let csv = new CSV({headers: headers, data: arr, filename: "fishevents"})
 			  csv.encodeCSV()
 			  let zipfiles = []
@@ -2356,7 +2383,38 @@ class Exporter {
 		      zipfiles.push({filename: "metadata.txt", content: JSON.stringify(metadata, null, 2)})			
 			  this.zipSave(zipfiles,"export.csv.zip")
 	
-			  break;			  
+			  break;
+			case 'csv-raw':
+			  let arr1 = []
+
+			  this.data.forEach(function(fish){
+			    //loop over events and then get add row with raw data
+			    fish.events.forEach(function(event){
+  			    var fishdata = event.data()
+  			    let newrow = {};
+  			    if(fishdata){
+    					Object.keys(fishdata).forEach(function(dd){
+    					  var PTAGIS_name = _this.export_options.name_lookup[dd]
+    					  if(!PTAGIS_name)PTAGIS_name = dd;
+    						newrow[PTAGIS_name] = fishdata[dd];
+    					}) 
+    				if(newrow["Event Date Time Value"])newrow["Event Date Time Value"] = _this.dateFormat2(newrow["Event Date Time Value"]);
+    				else newrow["Event Date Time Value"] = "";
+    				if(newrow["Event Release Date Time Value"])newrow["Event Release Date Time Value"] = _this.dateFormat2(newrow["Event Release Date Time Value"]);
+    				else newrow["Event Release Date Time Value"] = "";
+    				if(newrow["Release Date MMDDYYYY"])newrow["Release Date MMDDYYYY"] = _this.dateFormat1(newrow["Release Date MMDDYYYY"]);
+    				else newrow["Release Date MMDDYYYY"] = "";
+  					arr1.push(newrow)
+  			    }
+			    })
+			    
+
+			  })			  
+			  let headers1 = Object.keys(arr1[0])
+			  let csv1 = new CSV({headers: headers1, data: arr1, filename: "RawPTAGIS"})
+			  csv1.encodeCSV()
+			  csv1.exportCSV()
+			  break;  
 			default:
 		}
 	}
@@ -2415,6 +2473,7 @@ class Exporter {
 
 class CSV{
 	constructor(args){
+	  console.log("CSV generated")
 		var _this = this;
 		var data = args.data || null;
 		this.items = [];
@@ -2451,7 +2510,8 @@ class CSV{
 					item[dd] = _this.encodeItem(d[dd],i)
 				})
 			_this.items.push(item)
-		})		
+		})
+		
 	}
 	
 	encodeItem(item,index){
