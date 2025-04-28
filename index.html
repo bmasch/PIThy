@@ -1,1 +1,1115 @@
-Nothing here yet
+<html lang="en">
+<head>
+    <title>PIThy -- PIT-tag Data Hypertool</title>
+
+    <meta charset="UTF-8">
+	<link rel="stylesheet" type="text/css" href="/script/dc.js/bootstrap.min.css">
+    <link rel="stylesheet" type="text/css" href="/script/dc.js/dc.css"/>
+<link rel="stylesheet" href="https://code.jquery.com/ui/1.10.2/themes/smoothness/jquery-ui.css" />
+<script src="https://code.jquery.com/jquery-1.9.1.js"></script>
+<script src="https://code.jquery.com/ui/1.10.2/jquery-ui.js"></script>
+	<script src="https://s3.amazonaws.com/stitch-sdks/js/bundles/4.6.0/stitch.js"></script>
+	<script src="https://d3js.org/d3.v3.min.js" charset="utf-8"></script>
+	<script src="https://d3js.org/queue.v1.min.js"></script>
+	<script type="text/javascript" src="/script/crossfilter.min.js"></script>
+	<script type="text/javascript" src="/script/dc.js/dc.js.2.min.js"></script>
+	<script type="text/javascript" src="/script/dc.js/colorbrewer.js"></script>
+	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
+
+ 
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.2/dist/leaflet.css"
+     integrity="sha256-sA+zWATbFveLLNqWO2gtiw3HL/lh1giY/Inf1BJ0z14="
+     crossorigin=""/>
+
+  <script src="https://unpkg.com/leaflet@1.9.2/dist/leaflet.js"
+     integrity="sha256-o9N1jGDZrf5tS+Ft4gbIK7mYMipq9lqpVJ91xHSyKhg="
+     crossorigin=""></script>
+	 
+  <script src="https://unpkg.com/leaflet.vectorgrid@latest/dist/Leaflet.VectorGrid.bundled.js"></script>
+  
+  <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.css"/>
+  <script src="https://unpkg.com/leaflet.markercluster@1.4.1/dist/leaflet.markercluster.js"></script>
+
+
+  <script type="text/javascript" src="/script/CBMap.js"></script>
+  <script type="text/javascript" src="PTAGIS_Names.js"></script>
+  <script type="text/javascript" src="transport_dates.js"></script>
+  <script type="text/javascript" src="/script/jszip.js"></script>  
+  <script type="text/javascript" src="pithy.js"></script>  
+  <link rel="stylesheet" href="PITtool.css"/>
+  <link rel="stylesheet" href="PITtool_elements.css"/>
+  <link rel="stylesheet" href="/script/piemarkers.css" />  
+  <link rel="stylesheet" href="/script/colorbrewer.css" />
+  <link rel="stylesheet" href="pithy.css" />
+<style>
+
+
+</style>
+<div id="spinner"><img src="/images/spinner.gif"></div>
+<div class="page-header">
+	<div class="pithy-logo"><h3 class="pithy-text">PIT<span class="logo-highlight">hy</span></h3></div>
+	<div class="layer-control-btn"><span class="btn header-btn layer-name"></span></div>
+	<div id="mode-buttons" class="page-header-buttons" style="display: block;">
+		<span class="options-btn header-btn btn">Options</span><span class="separator"></span><span class="help-btn header-btn btn">Help</span><span class="separator"></span><span class="about-btn header-btn btn">About</span>
+	</div>
+</div>
+<div class="layer-control main-area popup-dialog">
+	<div class="info-box">
+		<div class="info-box-scrolled">
+		<div class="layer-menu">
+			<h3>PTAGIS Files</h3>
+			<div class="pin-all pinnable">
+
+      </div>
+		<div class="layer-list"></div>
+		<div id="drop_zone">
+		Drop or paste files here or&nbsp;<label for="inputTag">&nbsp;click here&nbsp;<input id="inputTag" type="file" class="fileinput"/></label>&nbsp;to select from a folder
+		<div class="subtitle">Accepted:
+			<ul>
+			<li>PTAGIS CSV files</li>
+			</ul>
+		</div>
+
+		</div>
+		<div id="progress_bar"><div class="percent">0%</div></div>
+		</div>
+		
+		<h3>Load Options</h3>
+		<div class="option-menu" style="width: 400px">
+			<h4>Auto Load Attributes</h4>
+			<div><label for="dart-hourly"><input type="checkbox" class="checkbox dart-hourly" onclick="params.get_attributes=this.checked;"/>Load hourly data (DART)</label>
+			<div class="tip-button">?<div class="tip-anchor">
+			<div class="tip">Load pertinent hourly environmental<br>attribute data from DART
+			</div></div></div></div>
+
+		</div>
+		
+		<div class="option-menu" style="width: 400px">
+			<h4>Pre-filtering</h4>
+			<div><label for="remove-zeroevents"><input type="checkbox" class="checkbox remove-zeroevents" onclick="params.remove_zeroevents=this.checked;" checked/>Remove fish with zero events after release</label>
+			<div class="tip-button">?<div class="tip-anchor">
+			<div class="tip">Remove fish for which there are<br>zero events recorded after release
+			</div></div></div></div>
+
+		</div>		
+
+			<h4>Pruning Level</h4>
+			<div class="option-menu" style="width: 400px">
+
+			<div><label><input type="radio" name="prune_level" value="site" class="radio prune_level" checked>Site</label><div class="tip-button">?<div class="tip-anchor">
+			<div class="tip">Removes intermediate detections at a specific interrogation site, within the specified time window from the previous detection at the site.</div></div></div></div>			
+<!--
+			<div><label><input type="radio" name="prune_level" value="antenna_group" class="radio prune_level">Antenna Group</label><div class="tip-button">?<div class="tip-anchor">
+			<div class="tip">Removes intermediate detections at a specific antenna group, within the specified time window from the previous detection at the antenna group.</div></div></div></div>
+
+			<div><label><input type="radio" name="prune_level" value="antenna_id" class="radio prune_level">Antenna</label><div class="tip-button">?<div class="tip-anchor">
+			<div class="tip">Removes intermediate detections at a specific antenna, within the specified time window from the previous detection at the antenna.</div></div></div></div>
+-->
+			<div><label><input type="radio" name="prune_level" value="none" class="radio prune_level">None</label>
+			<div class="tip-button">?<div class="tip-anchor">
+			<div class="tip">Retains all detections.</div></div></div></div>
+
+		</div> <!-- option menu -->		
+		
+		</div>
+	</div>
+</div>
+
+<div class="simplify-options main-area popup-dialog">
+	<div class="info-box">
+		<div class="close2-btn"></div>
+
+
+		<div>
+<!-- 			<div class="cancel-btn btn dialog-btn">Cancel</div> -->
+			<div class="submit-btn btn dialog-btn">Apply</div>
+		</div>
+	</div> <!-- .info-box -->
+</div> <!-- simplify-options -->
+
+<!-- help-options -->
+<div class="help-options main-area popup-dialog">
+	<div class="info-box-scrolled">
+		<div class="info-box" style="overflow: auto; height: 800px">
+		<div class="close2-btn"></div>
+		<h3>PIThy Help</h3>
+<p class="help_text">		
+<em><b>Required PTAGIS Attributes</b></em><br>
+Although the eventual goal for this tool is to be able to process results from several different <a href="https://www.ptagis.org" target = "_new">PTAGIS</a> query types, as well as many from DART, PIThy currently expects output files from PTAGIS Complete Tag History queries.
+If you are now familiar with PTAGIS, it is first necessary to register as a user and enter the Advanced Reporting module. 
+</p>
+<p class="help_text">
+<img src = "img/Required-PTAGIS-Attrs.png" align = "left" border="0" margin="5"/><br/>
+Shown at left is an optimal set of attributes for a Complete Tag History query. PIThy is designed to work with results at the individual tag level (Tag attribute thus is mandatory), corresponding to a single fish with a known release date and time, and a series of events which are also tracked in time and location.<br>
+Many of the fish-specific attributes are not strictly required, including species, run, and rear type, but if the result set will include multiple types of these, including them will permit filtering by them in the tool. Length is also not required, but can be useful for certain analyses.
+</p>
+<br/><br/>
+<p class="help_text">
+<em><b>Loading Files</b></em>/br>
+One or more local files can be loaded into PIThy by either dragging and dropping them into the target area on the start screen or by clicking on the link within the area and selecting with the system file chooser.
+If you wish to have associated environmental variables automatically loaded from DART, check that checkbox before loading files. 
+</p>
+<p class="help_text">
+<em><b>Saving Files</b></em><br>
+To export data and metadata from PIThy, click on the download icon at top of the FishFilter (as shown below, highlighted in yellow). A window will appear to the right offering a choice between formats. Only the (fish) data chosen using the FishFilter is prepared for the export.
+<img src = "img/Saving-Files.png" border="0" margin="5"/><br/>
+</p>
+<p class="help_text">
+More help is on the way...
+<p>
+	</div></div>
+</div><!-- help-options -->
+
+<!-- about-options -->
+<div class="about-options main-area popup-dialog">
+	<div class="info-box-scrolled">
+	<div class="info-box">
+		<div class="close2-btn"></div>
+		<h3>About PIThy</h3>
+		<!--
+<p class="help_text">He was an old man who fished alone in a skiff in the Gulf Stream and he had gone eighty-four days now without taking a fish. In the first forty days a boy had been with him. But after forty days without a fish the boy's parents had told him that the old man was now definitely and finally <I>salao,</I> which is the worst form of unlucky, and the boy had gone at their orders in another boat which caught three good fish the first week. It made the boy sad to see the old man come in each day with his skiff empty and he always went down to help him carry either the coiled lines or the gaff and harpoon and the sail that was furled around the mast. The sail was patched with flour sacks and, furled, it looked like the flag of permanent defeat.</p><p class="help_text">The old man was thin and gaunt with deep wrinkles in the back of his neck. The brown blotches of the benevolent skin cancer the sun brings from its reflection on the tropic sea were on his cheeks. The blotches ran well down the sides of his face and his hands had the deep-creased scars from handling heavy fish on the cords. But none of these scars were fresh. They were as old as erosions in a fishless desert.</p><p class="help_text">Everything about him was old except his eyes and they were the same color as the sea and were cheerful and undefeated.</p><p class="help_text">"Santiago," the boy said to him as they climbed the bank from where the skiff was hauled up. "I could go with you again. We've made some money."</p><p class="help_text">The old man had taught the boy to fish and the boy loved him.</p><p class="help_text">"No," the old man said. "You're with a lucky boat. Stay with them."</p><p class="help_text">"But remember how you went eighty-seven days without fish and then we caught big ones every day for three weeks."</p><p class="help_text">"I remember," the old man said. "I know you did not leave me because you doubted."</p><p class="help_text">"It was papa made me leave. I am a boy and I must obey him."</p><p class="help_text">"I know," the old man said. "It is quite normal."</p><p class="help_text">"He hasn't much faith."</p><p class="help_text">"No," the old man said. "But we have. Haven't we?"</p><p class="help_text">"Yes," the boy said. "Can I offer you a beer on the Terrace and then we'll take the stuff home."</p><p class="help_text">"Why not?" the old man said. "Between fishermen."</p><p class="help_text">They sat on the Terrace and many of the fishermen made fun of the old man and he was not angry. Others, of the older fishermen, looked at him and were sad. But they did not show it and they spoke politely about the current and the depths they had drifted their lines at and the steady good weather and of what they had seen. The successful fishermen of that day were already in and had butchered their marlin out and carried them laid full length across two planks, with two men staggering at the end of each plank, to the fish house where they waited for the ice truck to carry them to the market in Havana. Those who had caught sharks had taken them to the shark factory on the other side of the cove where they were hoisted on a block and tackle, their livers removed, their fins cut off and their hides skinned out and their flesh cut into strips for salting.</p><p class="help_text">When the wind was in the east a smell came across the harbour from the shark factory; but today there was only the faint edge of the odour because the wind had backed into the north and then dropped off and it was pleasant and sunny on the Terrace.</p><p class="help_text">"Santiago," the boy said.</p><p class="help_text">"Yes," the old man said. He was holding his glass and thinking of many years ago.</p><p class="help_text">"Can I go out to get sardines for you for tomorrow?"</p><p class="help_text">"No. Go and play baseball. I can still row and Rogelio will throw the net."</p><p class="help_text">"I would like to go. If I cannot fish with you, I would like to serve in some way."</p><p class="help_text">"You bought me a beer," the old man said. "You are already a man."</p><p class="help_text">"How old was I when you first took me in a boat?"</p><p class="help_text">"Five and you nearly were killed when I brought the fish in too green and he nearly tore the boat to pieces. Can you remember?"</p><p class="help_text">"I can remember the tail slapping and banging and the thwart breaking and the noise of the clubbing. I can remember you throwing me into the bow where the wet coiled lines were and feeling the whole boat shiver and the noise of you clubbing him like chopping a tree down and the sweet blood smell all over me."</p><p class="help_text">"Can you really remember that or did I just tell it to you?"</p><p class="help_text">"I remember everything from when we first went together."</p><p class="help_text">The old man looked at him with his sun-burned, confident loving eyes.</p><p class="help_text">"If you were my boy I'd take you out and gamble," he said. "But you are your father's and your mother's and you are in a lucky boat."</p><p class="help_text">"May I get the sardines? I know where I can get four baits too."</p><p class="help_text">"I have mine left from today. I put them in salt in the box."</p><p class="help_text">"Let me get four fresh ones."</p><p class="help_text">"One," the old man said. His hope and his confidence had never gone. But now they were freshening as when the breeze rises.</p><p class="help_text">"Two," the boy said.</p><p class="help_text">"Two," the old man agreed. "You didn't steal them?"</p><p class="help_text">"I would," the boy said. "But I bought these."</p><p class="help_text">"Thank you," the old man said. He was too simple to wonder when he had attained humility. But he knew he had attained it and he knew it was not disgraceful and it carried no loss of true pride.</p><p class="help_text">"Tomorrow is going to be a good day with this current," he said.</p><p class="help_text">"Where are you going?" the boy asked.</p><p class="help_text">"Far out to come in when the wind shifts. I want to be out before it is light."</p><p class="help_text">"I'll try to get him to work far out," the boy said. "Then if you hook something truly big we can come to your aid."</p><p class="help_text">"He does not like to work too far out."</p><p class="help_text">"No," the boy said. "But I will see something that he cannot see such as a bird working and get him to come out after dolphin."</p><p class="help_text">"Are his eyes that bad?"</p><p class="help_text">"He is almost blind."</p><p class="help_text">"It is strange," the old man said. "He never went turtle-ing. That is what kills the eyes."</p><p class="help_text">"But you went turtle-ing for years off the Mosquito Coast and your eyes are good."</p><p class="help_text">"I am a strange old man."</p><p class="help_text">"But are you strong enough now for a truly big fish?"</p><p class="help_text">"I think so. And there are many tricks."</p><p class="help_text"><FONT SIZE="-1">Copyright &copy; 1952 by Ernest Hemingway</p><p class="help_text">Copyright renewed &copy; 1980 by Mary Hemingway</FONT></p>
+-->
+<p class="help_text">
+PIThy is a browser-based tool for processing PITtag data collected and maintained by <a href="https://ptagis.org/About/Introduction" target = "_new">PTAGIS</a>.
+<p class="help_text">
+PIThy is currently in an early development stage and feedback is welcome. This project is funded by the Bonneville Power Administration.
+<p>
+	</div></div>
+</div><!-- about-options -->
+
+<!-- export -->
+<div class="export-options main-area popup-dialog">
+	<div class="info-box-scrolled">
+	<div class="info-box">
+		<div class="close2-btn"></div>
+		<h3>Export</h3>
+			<h4>Export Format</h4>
+			<div class="option-menu">
+
+			<div><label><input type="radio" name="export_format" id="json" value="json" class="radio export_format" checked>Single JSON file</label><div class="tip-button">?<div class="tip-anchor">
+			<div class="tip">Uncompressed file in JSON format.</div></div></div></div>			
+
+			<div><label><input type="radio" name="export_format" id="json-zip" value="json-zip" class="radio export_format">Zipped JSON files</label><div class="tip-button">?<div class="tip-anchor">
+			<div class="tip">Zip-compressed JSON files.</div></div></div></div>
+
+			<div><label><input type="radio" name="export_format" id="csv-zip" value="csv-zip" class="radio export_format">Zipped CSV files</label><div class="tip-button">?<div class="tip-anchor">
+			<div class="tip">Zip-compressed CSV files.</div></div></div></div>
+			
+			<div><label><input type="radio" name="export_format" id="csv-raw" value="csv-raw" class="radio export_format">PTAGIS Raw</label><div class="tip-button">?<div class="tip-anchor">
+			<div class="tip">PTAGIS Raw CSV.</div></div></div></div>			
+
+		</div> <!-- option menu -->		
+		<div>
+			<div class="cancel-btn btn dialog-btn">Cancel</div>
+			<div id="export_execute" class="submit-btn btn dialog-btn">Proceed</div>
+		</div>
+	</div></div>
+</div><!-- export-options -->
+
+<div class="container-fluid">
+	<div class="row">
+		<div class="span12">
+
+		</div>
+	</div>
+
+	<div class="row">
+		<div class="span12">
+			
+		</div>
+	</div>
+	<div class="row">
+		<div class="span5 fishfilter" style="visibility: hidden; border-right-style: groove">
+			<span class = "mod-title fishfilter">Fish Filter</span>&nbsp;<span class="help-icon">?</span>&nbsp;<img class="download-icon" src="img/download.png" id="fishfilter_export" style="cursor: pointer;">
+			<hr class="mod-title"/>
+		</div>	
+	</div>
+	
+	<div class="row">
+		<div class="span5 fishfilter" style="visibility: hidden; border-right-style: groove">
+			<div id="dc-data-count">
+				<span class="filter-count"></span> selected out of <span class="total-count"></span> fish&nbsp;<span><a href="javascript:dc.filterAll(); dc.renderAll(); drawSliders() ;params.updateFunctions = doTracks(params.fishtracks.options);">(reset all)</a></span>
+			</div>
+		</div>
+	</div>	
+	<div class="row">
+		<div class="span5 fishfilter" style="visibility: hidden; border-right-style: groove">
+		  <ul class="nav nav-tabs">
+			<li class="active"><a data-toggle="tab" href="#filter1">Fish</a></li>
+			<li><a data-toggle="tab" href="#filter2">Release</a></li>
+			<li><a data-toggle="tab" href="#filter3">Detection</a></li>
+			<li><a data-toggle="tab" href="#filter4">Advanced</a></li>
+		  </ul>
+		<div class="tab-content">
+			<div id="filter1" class="tab-pane fade in active">
+				<div id="pie-species" class="control">
+					<div><strong>Species</strong>
+					<a class="reset" href="javascript:params.fishfilter.reset('species')" style="display: none;">reset</a>
+					</div>
+				</div>			
+				<div id="pie-run" class="control">
+					<div><strong>Run</strong>
+					<a class="reset" href="javascript:params.fishfilter.reset('run')" style="display: none;">reset</a>
+					</div>
+				</div>
+				<div id="pie-rtype" class="control">
+					<div><strong>Rearing</strong>
+					<a class="reset" href="javascript:params.fishfilter.reset('rtype');" style="display: none;">reset</a>
+					</div>
+				</div>
+			</div>
+			<div id="filter2" class="tab-pane fade">
+				<div id="chart-basin" class="control">
+					<div><strong>Release Basin</strong>
+					<a class="reset" href="javascript:params.fishfilter.reset('basin');" style="display: none;">reset</a>
+					</div>
+				</div>		
+				<div id="pie-subbasin" class="control">
+					<div><strong>Release Subbasin</strong>
+					<a class="reset" href="javascript:params.fishfilter.reset('subbasin');" style="display: none;">reset</a>
+					</div>
+				</div>	
+				<div id="pie-rel_site" class="control">
+					<div><strong>Release Site</strong>
+					<a class="reset" href="javascript:params.fishfilter.reset('relsite');" style="display: none;">reset</a>
+					</div>
+				</div>
+				<div id="pie-year" class="control">
+					<div><strong>Release Year</strong>
+					<a class="reset" href="javascript:params.fishfilter.reset('year');" style="display: none;">reset</a>
+					</div>
+				</div>
+				<div id="chart-flength" class="control">
+					<div><strong>Release Length</strong>
+					<a class="reset" href="javascript:params.fishfilter.reset('flength');" style="display: none;">reset</a>
+					</div>
+				</div>		
+
+				<div id="pie-transport" class="control">
+					<div><strong>Transported</strong>
+					<a class="reset" href="javascript:params.fishfilter.reset('transport');" style="display: none;">reset</a>
+					</div>
+				</div>			
+			</div>	
+			<div id="filter3" class="tab-pane fade">		
+				<div id="pie-dbasin" class="control">
+					<div><strong>Detected In Basin</strong>
+					<a class="reset" href="javascript:params.fishfilter.reset('dbasin');" style="display: none;">reset</a>
+					</div>
+				</div>
+				<div id="pie-dsubbasin" class="control">
+					<div><strong>Detected In Subbasin</strong>
+					<a class="reset" href="javascript:params.fishfilter.reset('dsubbasin');" style="display: none;">reset</a>
+					</div>
+				</div>
+				<div id="pie-dsites" class="control">
+					<div><strong>Detected At</strong>
+					<a class="reset" href="javascript:params.fishfilter.reset('dsites');" style="display: none;">reset</a>
+					</div>
+				</div>
+				<div id="pie-lastsite" class="control">
+					<div><strong>Last Detected At</strong>
+					<a class="reset" href="javascript:params.fishfilter.reset('lastsite');" style="display: none;">reset</a>
+					</div>
+				</div>				
+			</div>
+			<div id="filter4" class="tab-pane fade">
+				<table>
+				<tr><td><input id="filterlabel" type="text" placeholder="description&hellip;" size=15/></td>
+				<td><button type="button" id="newfilterbutton">Add</button></td></tr>
+				</table>
+			</div>
+			<div id="filter5" class="tab-pane fade">
+			</div>	
+		</div>	
+	</div>
+	
+	<div class="span12 components" style="visibility: hidden">
+		<div class="row">
+		  <ul class="nav nav-tabs">
+			<li class="active"><a data-toggle="tab" href="#filter10">Map</a></li>
+			<li><a data-toggle="tab" href="#filter20">Fish Tracks</a></li>
+		  </ul>
+
+			<div class="tab-content">
+				<div id="filter10" class="tab-pane fade in active">
+					<div class="row">
+					<div id="map_progress"><div id="map_progress-bar"></div></div>
+					</div>
+					<div class="row">
+						<div id="leafmap" class="span12">
+						Initializing Map...
+						</div>
+					</div>
+					<div class="row">
+						<div class="span4">
+							<h4>Pie Options</h4>
+						</div>
+					</div>
+					<table id="pie_options_table" cellpadding=2 cellspacing=2>
+					<tr>
+						<td>&nbsp;</td>
+						<td>
+							<b>Event Date Range</b>:
+						</td>
+						<td>&nbsp;&nbsp;</td>
+						<td colspan="2">
+							<div id="event_date_slider"></div>
+							<p><span id="event_dates"></span></p>
+						</td>
+					</tr>
+					<tr>
+						<td>&nbsp;</td>
+						<td width=120>
+							<b>Event Types:</b>
+						</td>
+						<td>&nbsp;&nbsp;</td>
+						<td colspan="2">
+							<input class="event_filter_option" type="checkbox" name="event_type" value="Mark"/>&nbsp;Mark&nbsp;&nbsp;
+							<input class="event_filter_option" type="checkbox" name="event_type" value="Release" checked/>&nbsp;Release&nbsp;&nbsp;						
+							<input class="event_filter_option" type="checkbox" name="event_type" value="Observation" checked/>&nbsp;Observation<br/>
+							<input class="event_filter_option" type="checkbox" name="event_type" value="Recapture" checked/>&nbsp;Recapture&nbsp;&nbsp;
+							<input class="event_filter_option" type="checkbox" name="event_type" value="Recovery" checked/>&nbsp;Recovery&nbsp;&nbsp;
+							<input class="event_filter_option" type="checkbox" name="event_type" value="Passive Recovery" checked/>&nbsp;Passive Recovery		
+						</td>
+					</tr>
+					<tr>
+						<td>&nbsp;</td>
+						<td>
+							<b>Pie Slice Mode:</b>
+						</td>
+						<td>&nbsp;&nbsp;</td>
+						<td colspan="2">
+							<input class="pie_mode" type="radio" name="pie_mode" value="event" checked/>&nbsp;fish/event attributes&nbsp;&nbsp;
+							<input class="pie_mode" type="radio" name="pie_mode" value="measure"/>&nbsp;environmental metrics&nbsp;&nbsp;							
+						</td>
+					<tr>
+						<td>&nbsp;</td>
+						<td>
+							<b>Event Variable:</b>
+						</td>
+						<td>&nbsp;&nbsp;</td>					
+						<td width=275>
+						<select id="pie_event_variable">
+							<option value="type">Event Type</option>
+							<option value="species">Species</option>
+							<option value="rtype">Rearing Type</option>
+							<option value="run_name">Fish Run</option>
+							<option value="release_basin">Release Basin</option>
+							<!--<option value="basin_status">in release basin?</option>-->
+						</select>
+						</td>
+						<td width=120>
+							<b>Enviro Variable:</b>
+						</td>
+						<td>&nbsp;&nbsp;</td>					
+						<td width=275>
+						<select id="pie_enviro_variable" style="disabled = 'disabled'">
+							<option value="Temperature (C)">Temp (C)</option>
+							<option value="Dissolved Gas Percent (%)">TDG (%)</option>
+							<option value="Spill Percent (%)">Spill (%)</option>
+						</select>
+						</td>
+					</tr>					
+					<tr>
+						<td>&nbsp;</td>
+						<td>
+							<b>Pie Palette:</b>
+						</td>
+						<td>&nbsp;&nbsp;</td>
+						<td>
+						<select id="pie_palette_options">
+							<option value="YlGn">YlGn</option>
+							<option value="YlGnBu">YlGnBu</option>
+							<option value="GnBu">GnBu</option>
+							<option value="BuGn">BuGn</option>
+							<option value="PuBuGn">PuBuGn</option>
+							<option value="PuBu">PuBu</option>
+							<option value="BuPu">BuPu</option>
+							<option value="RdPu">RdPu</option>
+							<option value="PuRd">PuRd</option>
+							<option value="OrRd">OrRd</option>
+							<option value="YlOrRd">YlOrRd</option>
+							<option value="YlOrBr">YlOrBr</option>
+							<option value="Purples">Purples</option>
+							<option value="Blues">Blues</option>
+							<option value="Greens">Greens</option>
+							<option value="Oranges">Oranges</option>
+							<option value="Reds">Reds</option>
+							<option value="Greys">Greys</option>
+							<option value="PuOr">PuOr</option>
+							<option value="BrBG">BrBG</option>
+							<option value="PRGn">PRGn</option>
+							<option value="PiYG">PiYG</option>
+							<option value="RdBu">RdBu</option>
+							<option value="RdGy">RdGy</option>
+							<option value="RdYlBu">RdYlBu</option>
+							<option value="Spectral">Spectral</option>
+							<option value="RdYlGn">RdYlGn</option>
+						</select>
+						</td>
+					</tr>
+					</table>
+				</div>
+
+				<div id="filter20" class="tab-pane fade">
+					<div id="fishplot">
+				</div>			
+			</div>
+		</div>	
+	</div>
+</div>
+
+</div>
+
+</div>
+
+<script>
+  var params = {
+    get_attributes: false,
+	remove_zeroevents: true,
+	promises: [],
+	onUpdateFxns: [],
+	export_options:
+		{
+			FishFilter: {
+				attributes: true,
+				metadata: true,
+				filetype: "json",
+				name_lookup: PTAGIS_name_lookup
+			}
+		},
+	handlers:
+	{
+		process_files: function(){
+		console.log("process_files")
+			Promise.all(params.promises).then(function() {
+				//consider using allSettled() :
+				// https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise/allSettled
+				params.promises = []
+				params.fishdata.tossFish()
+				params.fishdata.sortEvents()
+				params.fishdata.pruneEvents()
+				params.edata.setFishArray(params.fishdata.fisharray)
+				if(params.get_attributes)params.edata.fetchData()
+				else{
+					d3.select(".layer-control").style("display","none")
+					d3.select(".layer-control-btn").classed("active",true)
+					d3.select("span.layer-name").html(params.fishdata.fileCountText() + "&nbsp;▼")
+					d3.selectAll(".fishfilter").style("visibility","visible")
+					d3.selectAll(".components").style("visibility","visible")
+					params.fishfilter = new FishFilter({fishfarm: params.fishdata})
+					params.fishfilter.init()
+					params.eventfilter = new EventFilter({sitemap:params.sitemap})
+					params.eventfilter.setData(params.fishfilter.filteredData()).init()
+					params.fishtracks.doTracks()
+					params.fishfilter.onChangeFxns.push(params.fishtracks.doTracks.bind(params.fishtracks))
+					params.fishfilter.onChangeFxns.push(function(){params.eventfilter.setData(params.fishfilter.filteredData()).init()})
+					if(!params.leafmap){
+						params.leafmap = new CBMap({target: "leafmap", center: [47,-120], zoom: 6})
+						params.leafmap.initMap()
+						params.riverlayer = new RiverVectorLayer({map:params.leafmap})
+						params.leafmap.addOverlay(params.riverlayer.layer,"Rivers",true)
+						L.control.legend({ position: 'topleft', id: "pie_legend" }).addTo(params.leafmap.getMap());					
+					}					
+					params.pielayer = new ClusterPieLayer({data: params.eventfilter.filteredData.bind(params.eventfilter),categoryField: "type", map: params.leafmap.getMap()})
+					params.eventfilter.onChangeFxns.push(function(){if(d3.selectAll(".pie_mode")[0][1].checked==true)params.eventfilter.setMeasureMode("measure")})						
+					params.eventfilter.onChangeFxns.push(params.pielayer.update.bind(params.pielayer))
+					document.getElementById("spinner").style.visibility = 'hidden';				
+				}
+			})
+		},
+		process_remote_file: function(){
+			console.log("process remote file")
+			params.fishdata.tossFish()
+			params.fishdata.sortEvents()
+			params.fishdata.pruneEvents()
+			params.edata.setFishArray(params.fishdata.fisharray)
+			if(params.get_attributes)params.edata.fetchData()
+			else{
+				d3.select(".layer-control").style("display","none")
+				d3.select(".layer-control-btn").classed("active",true)
+				d3.select("span.layer-name").html(params.fishdata.fileCountText() + "&nbsp;▼")
+				d3.selectAll(".fishfilter").style("visibility","visible")
+				d3.selectAll(".components").style("visibility","visible")
+				params.fishfilter = new FishFilter({fishfarm: params.fishdata})
+				params.fishfilter.init()
+				params.eventfilter = new EventFilter({sitemap:params.sitemap})
+				params.eventfilter.setData(params.fishfilter.filteredData()).init()				
+				if(!params.leafmap){
+					params.leafmap = new CBMap({target: "leafmap", center: [47,-120], zoom: 6})
+					params.leafmap.initMap()
+					params.riverlayer = new RiverVectorLayer({map:params.leafmap})
+					params.leafmap.addOverlay(params.riverlayer.layer,"Rivers",true)
+					L.control.legend({ position: 'topleft', id: "pie_legend" }).addTo(params.leafmap.getMap());					
+				}
+				params.fishtracks.doTracks()
+				params.fishfilter.onChangeFxns.push(params.fishtracks.doTracks.bind(params.fishtracks))
+				params.fishfilter.onChangeFxns.push(function(){params.eventfilter.setData(params.fishfilter.filteredData()).init()})
+				params.pielayer = new ClusterPieLayer({data: params.eventfilter.filteredData.bind(params.eventfilter),categoryField: "type", map: params.leafmap.getMap()})
+				params.eventfilter.onChangeFxns.push(function(){if(d3.selectAll(".pie_mode")[0][1].checked)params.eventfilter.setMeasureMode("measure")})					
+				params.eventfilter.onChangeFxns.push(params.pielayer.update.bind(params.pielayer))			
+				document.getElementById("spinner").style.visibility = 'hidden';				
+			}
+		},
+		process_attrs: function(){
+			console.log("process_attrs")
+			Promise.all(params.promises).then(function() {
+				d3.select(".layer-control").style("display","none")
+				d3.select(".layer-control-btn").classed("active",true)
+				d3.select("span.layer-name").html(params.fishdata.fileCountText() + "&nbsp;▼")
+				params.progressbar.clear()
+				params.edata.assignEnviroData()
+				d3.selectAll(".fishfilter").style("visibility","visible")
+				d3.selectAll(".components").style("visibility","visible")
+				params.fishfilter = new FishFilter({fishfarm: params.fishdata})
+				params.fishfilter.init()
+				params.eventfilter = new EventFilter({sitemap:params.sitemap})
+				params.eventfilter.setData(params.fishfilter.filteredData()).init()
+				if(!params.leafmap){
+					params.leafmap = new CBMap({target: "leafmap", center: [47,-120], zoom: 6})
+					params.leafmap.initMap()
+					params.riverlayer = new RiverVectorLayer({map:params.leafmap})
+					params.leafmap.addOverlay(params.riverlayer.layer,"Rivers",true)
+					L.control.legend({ position: 'topleft', id: "pie_legend" }).addTo(params.leafmap.getMap());					
+				}
+				params.fishtracks.doTracks()
+				params.fishfilter.onChangeFxns.push(params.fishtracks.doTracks.bind(params.fishtracks))
+				params.fishfilter.onChangeFxns.push(function(){params.eventfilter.setData(params.fishfilter.filteredData()).init()})
+				params.pielayer = new ClusterPieLayer({data: params.eventfilter.filteredData.bind(params.eventfilter),categoryField: "type", map: params.leafmap.getMap()})
+				params.eventfilter.onChangeFxns.push(function(){if(d3.selectAll(".pie_mode")[0][1].checked)params.eventfilter.setMeasureMode("measure")})					
+				params.eventfilter.onChangeFxns.push(params.pielayer.update.bind(params.pielayer))
+				document.getElementById("spinner").style.visibility = 'hidden';				
+			})
+		}
+	}
+  }
+  
+  
+  function handleFileSelect(evt) {
+    //document.getElementById("spinner").style.visibility = 'visible';
+	function handleProgress(event) {
+		params.progressbar.updateProgress(event.loaded,event.total,"loading and processing file(s)")
+	}	
+    evt.stopPropagation();
+    evt.preventDefault();
+	params.promises = [];
+    var files = evt.dataTransfer.files; // FileList object.
+	params.progressbar.init();
+	
+	Object.keys(files).forEach(function(f,i){
+			console.log(files[f])
+			//params.progressbar.updateProgress(50,100,"loading local file(s)")
+			params.promises.push(new Promise(function(resolve, reject) {
+			var reader = new FileReader();
+		    reader.onload = function fileReadCompleted(){
+				var newfish = new PTAGIS({file: files[f], processor: params.fishdata, result: reader.result})
+				resolve(true)
+			}
+			reader.addEventListener("progress",handleProgress);			
+			reader.readAsText(files[f]);
+		}))
+	})
+	
+	params.handlers.process_files()
+
+	
+  }
+ 
+
+  function handleDragOver(evt) {
+    evt.stopPropagation();
+    evt.preventDefault();
+    evt.dataTransfer.dropEffect = 'copy'; // Explicitly show this is a copy.
+  }
+
+  // Setup the dnd listeners.
+  var dropZone = document.getElementById('drop_zone');
+  dropZone.addEventListener('dragover', handleDragOver, false);
+  dropZone.addEventListener('drop', handleFileSelect, false);
+</script>
+
+<script>
+//https://www.html5rocks.com/en/tutorials/file/dndfiles//
+	var res;
+
+/*	
+  document.getElementById("fileOutput").addEventListener('click', function saveFile() {
+	params.fishdata.saveToJSON()
+  });
+*/  
+  
+  document.getElementById("inputTag").addEventListener('change', function getFile(){
+	//document.getElementById("spinner").style.visibility = 'visible';
+	params.promises = [];
+	var _this = this
+	Object.keys(_this.files).forEach(function(f){
+			params.promises.push(new Promise(function(resolve, reject) {
+			var reader = new FileReader();
+		    reader.onload =function fileReadCompleted(){
+				var newfish = new PTAGIS({file: _this.files[f], processor: params.fishdata, result: reader.result})
+				resolve(true)
+			}
+			reader.readAsText(_this.files[f]);
+		}))
+	})
+	
+	params.handlers.process_files()
+	/*
+	Promise.all(params.promises).then(function() {
+		params.fishdata.sortEvents()
+		params.fishdata.pruneEvents()
+		params.edata.setFishArray(params.fishdata.fisharray)
+		params.fishfilter = new FishFilter({fishfarm: params.fishdata})
+		params.fishfilter.init()
+		params.fishtracks.doTracks()
+		params.fishfilter.onChangeFxns.push(params.fishtracks.doTracks.bind(params.fishtracks))		
+		document.getElementById("spinner").style.visibility = 'hidden';	
+
+		
+	});
+*/	
+});
+</script> 
+
+<script>
+
+
+params.hucnames = {"170101":{"name":"Kootenai","latitude":49.15,"longitude":-115.79},"170102":{"name":"Pend Oreille","latitude":47.52,"longitude":-114.46},"170103":{"name":"Spokane","latitude":47.57,"longitude":-116.71},"170200":{"name":"Upper Columbia","latitude":48.46,"longitude":-119.29},"170300":{"name":"Yakima","latitude":46.69,"longitude":-120.59},"170401":{"name":"Snake Headwaters","latitude":43.44,"longitude":-110.71},"170402":{"name":"Upper Snake","latitude":43.2,"longitude":-113.15},"170501":{"name":"Middle Snake-Boise","latitude":43.19,"longitude":-116.62},"170502":{"name":"Middle Snake-Powder","latitude":44.74,"longitude":-117.52},"170601":{"name":"Lower Snake","latitude":46.17,"longitude":-117.55},"170602":{"name":"Salmon","latitude":44.93,"longitude":-114.84},"170603":{"name":"Clearwater","latitude":46.35,"longitude":-115.59},"170701":{"name":"Middle Columbia","latitude":45.8,"longitude":-119.82},"170702":{"name":"John Day","latitude":44.81,"longitude":-119.56},"170703":{"name":"Deschutes","latitude":44.27,"longitude":-120.98},"170800":{"name":"Lower Columbia","latitude":46.14,"longitude":-122.48},"170900":{"name":"Willamette","latitude":44.61,"longitude":-122.69},"171001":{"name":"Washington Coastal","latitude":47.22,"longitude":-123.79},"171002":{"name":"Northern Oregon Coastal","latitude":44.95,"longitude":-123.76},"171003":{"name":"Southern Oregon Coastal","latitude":42.86,"longitude":-123.4},"171100":{"name":"Puget Sound","latitude":48.12,"longitude":-122.5},"171200":{"name":"Oregon Closed Basins (Malheur)","latitude":42.91,"longitude":-119.57},"17010101":{"name":"Middle Kootenai","latitude":48.93,"longitude":-115.36},"17010102":{"name":"Fisher","latitude":48.17,"longitude":-115.15},"17010103":{"name":"Yaak","latitude":48.88,"longitude":-115.74},"17010104":{"name":"Lower Kootenai","latitude":49.36,"longitude":-116.72},"17010105":{"name":"Moyie","latitude":49.15,"longitude":-116.03},"17010106":{"name":"Elk","latitude":49.76,"longitude":-114.9},"17010201":{"name":"Upper Clark Fork","latitude":46.33,"longitude":-112.75},"17010202":{"name":"Flint-Rock","latitude":46.43,"longitude":-113.49},"17010203":{"name":"Blackfoot","latitude":47.02,"longitude":-113.11},"17010204":{"name":"Middle Clark Fork","latitude":47.11,"longitude":-114.74},"17010205":{"name":"Bitterroot","latitude":46.19,"longitude":-114.14},"17010206":{"name":"North Fork Flathead","latitude":48.93,"longitude":-114.38},"17010207":{"name":"Middle Fork Flathead","latitude":48.33,"longitude":-113.53},"17010208":{"name":"Flathead Lake","latitude":48.06,"longitude":-114.25},"17010209":{"name":"South Fork Flathead","latitude":47.79,"longitude":-113.46},"17010210":{"name":"Stillwater","latitude":48.47,"longitude":-114.6},"17010211":{"name":"Swan","latitude":47.67,"longitude":-113.8},"17010212":{"name":"Lower Flathead","latitude":47.51,"longitude":-114.35},"17010213":{"name":"Lower Clark Fork","latitude":47.82,"longitude":-115.42},"17010214":{"name":"Pend Oreille Lake","latitude":48.2,"longitude":-116.59},"17010215":{"name":"Priest","latitude":48.59,"longitude":-116.91},"17010216":{"name":"Pend Oreille","latitude":48.79,"longitude":-117.29},"17010301":{"name":"Upper Coeur d'Alene","latitude":47.77,"longitude":-116.15},"17010302":{"name":"South Fork Coeur d'Alene","latitude":47.49,"longitude":-116.03},"17010303":{"name":"Coeur d'Alene Lake","latitude":47.55,"longitude":-116.67},"17010304":{"name":"St. Joe","latitude":47.2,"longitude":-116.06},"17010305":{"name":"Upper Spokane","latitude":47.77,"longitude":-116.95},"17010306":{"name":"Hangman","latitude":47.38,"longitude":-117.15},"17010307":{"name":"Lower Spokane","latitude":47.84,"longitude":-117.87},"17010308":{"name":"Little Spokane","latitude":47.97,"longitude":-117.33},"17020001":{"name":"Franklin D. Roosevelt Lake","latitude":48.96,"longitude":-118.09},"17020002":{"name":"Kettle","latitude":49.32,"longitude":-118.68},"17020003":{"name":"Colville","latitude":48.39,"longitude":-117.78},"17020004":{"name":"Sanpoil","latitude":48.43,"longitude":-118.8},"17020005":{"name":"Chief Joseph","latitude":48.06,"longitude":-119.41},"17020006":{"name":"Okanogan","latitude":49.37,"longitude":-119.5},"17020007":{"name":"Similkameen","latitude":49.3,"longitude":-120.35},"17020008":{"name":"Methow","latitude":48.53,"longitude":-120.25},"17020009":{"name":"Lake Chelan","latitude":48.19,"longitude":-120.57},"17020010":{"name":"Upper Columbia-Entiat","latitude":47.46,"longitude":-120.23},"17020011":{"name":"Wenatchee","latitude":47.71,"longitude":-120.79},"17020012":{"name":"Moses Coulee","latitude":47.61,"longitude":-119.73},"17020013":{"name":"Upper Crab","latitude":47.52,"longitude":-118.51},"17020014":{"name":"Banks Lake","latitude":47.68,"longitude":-119.22},"17020015":{"name":"Lower Crab","latitude":47.11,"longitude":-119.19},"17020016":{"name":"Upper Columbia-Priest Rapids","latitude":46.66,"longitude":-119.16},"17030001":{"name":"Upper Yakima","latitude":47.09,"longitude":-120.74},"17030002":{"name":"Naches","latitude":46.79,"longitude":-121.13},"17030003":{"name":"Lower Yakima","latitude":46.35,"longitude":-120.28},"17040101":{"name":"Snake Headwaters","latitude":43.97,"longitude":-110.47},"17040102":{"name":"Gros Ventre","latitude":43.54,"longitude":-110.24},"17040103":{"name":"Greys-Hobock","latitude":43.2,"longitude":-110.66},"17040104":{"name":"Palisades","latitude":43.38,"longitude":-111.28},"17040105":{"name":"Salt","latitude":42.8,"longitude":-111.03},"17040201":{"name":"Idaho Falls","latitude":43.7,"longitude":-112.04},"17040202":{"name":"Upper Henrys","latitude":44.37,"longitude":-111.36},"17040203":{"name":"Lower Henrys","latitude":44.09,"longitude":-111.43},"17040204":{"name":"Teton","latitude":43.79,"longitude":-111.26},"17040205":{"name":"Willow","latitude":43.27,"longitude":-111.64},"17040206":{"name":"American Falls","latitude":43.1,"longitude":-112.63},"17040207":{"name":"Blackfoot","latitude":43.04,"longitude":-111.74},"17040208":{"name":"Portneuf","latitude":42.76,"longitude":-112.17},"17040209":{"name":"Lake Walcott","latitude":42.87,"longitude":-113.45},"17040210":{"name":"Raft","latitude":42.19,"longitude":-113.38},"17040211":{"name":"Goose","latitude":42.07,"longitude":-114.02},"17040212":{"name":"Upper Snake-Rock","latitude":42.65,"longitude":-114.53},"17040213":{"name":"Salmon Falls","latitude":41.97,"longitude":-114.81},"17040214":{"name":"Beaver-Camas","latitude":44.21,"longitude":-112.13},"17040215":{"name":"Medicine Lodge","latitude":44.08,"longitude":-112.59},"17040216":{"name":"Birch","latitude":44.17,"longitude":-112.96},"17040217":{"name":"Little Lost","latitude":44.06,"longitude":-113.26},"17040218":{"name":"Big Lost","latitude":43.74,"longitude":-113.49},"17040219":{"name":"Big Wood","latitude":43.42,"longitude":-114.47},"17040220":{"name":"Camas","latitude":43.35,"longitude":-114.83},"17040221":{"name":"Little Wood","latitude":43.26,"longitude":-114.1},"17050101":{"name":"C.J. Strike Reservoir","latitude":42.95,"longitude":-115.5},"17050102":{"name":"Bruneau","latitude":42.26,"longitude":-115.65},"17050103":{"name":"Middle Snake-Succor","latitude":43.2,"longitude":-116.6},"17050104":{"name":"Upper Owyhee","latitude":42.19,"longitude":-116.32},"17050105":{"name":"South Fork Owyhee","latitude":41.69,"longitude":-116.42},"17050106":{"name":"East Little Owyhee","latitude":41.87,"longitude":-117.02},"17050107":{"name":"Middle Owyhee","latitude":42.45,"longitude":-117.23},"17050108":{"name":"Jordan","latitude":42.94,"longitude":-117.06},"17050109":{"name":"Crooked-Rattlesnake","latitude":42.6,"longitude":-117.77},"17050110":{"name":"Lower Owyhee","latitude":43.32,"longitude":-117.64},"17050111":{"name":"North and Middle Forks Boise","latitude":43.87,"longitude":-115.36},"17050112":{"name":"Boise-Mores","latitude":43.77,"longitude":-115.86},"17050113":{"name":"South Fork Boise","latitude":43.55,"longitude":-115.23},"17050114":{"name":"Lower Boise","latitude":43.6,"longitude":-116.41},"17050115":{"name":"Middle Snake-Payette","latitude":44.02,"longitude":-116.97},"17050116":{"name":"Upper Malheur","latitude":43.76,"longitude":-118.36},"17050117":{"name":"Lower Malheur","latitude":43.8,"longitude":-117.6},"17050118":{"name":"Bully","latitude":44.05,"longitude":-117.78},"17050119":{"name":"Willow","latitude":44.26,"longitude":-117.65},"17050120":{"name":"South Fork Payette","latitude":44.17,"longitude":-115.49},"17050121":{"name":"Middle Fork Payette","latitude":44.29,"longitude":-115.85},"17050122":{"name":"Payette","latitude":44.07,"longitude":-116.41},"17050123":{"name":"North Fork Payette","latitude":44.69,"longitude":-116.01},"17050124":{"name":"Weiser","latitude":44.57,"longitude":-116.58},"17050201":{"name":"Brownlee Reservoir","latitude":44.73,"longitude":-116.99},"17050202":{"name":"Burnt","latitude":44.53,"longitude":-117.85},"17050203":{"name":"Powder","latitude":44.87,"longitude":-117.72},"17060101":{"name":"Hells Canyon","latitude":45.58,"longitude":-116.58},"17060102":{"name":"Imnaha","latitude":45.4,"longitude":-116.9},"17060103":{"name":"Lower Snake-Asotin","latitude":46.17,"longitude":-117.1},"17060104":{"name":"Upper Grande Ronde","latitude":45.34,"longitude":-118.08},"17060105":{"name":"Wallowa","latitude":45.42,"longitude":-117.45},"17060106":{"name":"Lower Grande Ronde","latitude":45.86,"longitude":-117.37},"17060107":{"name":"Lower Snake-Tucannon","latitude":46.52,"longitude":-117.64},"17060108":{"name":"Palouse","latitude":46.94,"longitude":-117.51},"17060109":{"name":"Rock","latitude":47.18,"longitude":-117.55},"17060110":{"name":"Lower Snake","latitude":46.45,"longitude":-118.65},"17060201":{"name":"Upper Salmon","latitude":44.27,"longitude":-114.51},"17060202":{"name":"Pahsimeroi","latitude":44.43,"longitude":-113.77},"17060203":{"name":"Middle Salmon-Panther","latitude":45.2,"longitude":-114.12},"17060204":{"name":"Lemhi","latitude":44.78,"longitude":-113.5},"17060205":{"name":"Upper Middle Fork Salmon","latitude":44.61,"longitude":-115.08},"17060206":{"name":"Lower Middle Fork Salmon","latitude":45.02,"longitude":-114.83},"17060207":{"name":"Middle Salmon-Chamberlain","latitude":45.46,"longitude":-115.25},"17060208":{"name":"South Fork Salmon","latitude":44.96,"longitude":-115.63},"17060209":{"name":"Lower Salmon","latitude":45.71,"longitude":-116.32},"17060210":{"name":"Little Salmon","latitude":45.15,"longitude":-116.32},"17060301":{"name":"Upper Selway","latitude":45.86,"longitude":-114.72},"17060302":{"name":"Lower Selway","latitude":46.09,"longitude":-115.09},"17060303":{"name":"Lochsa","latitude":46.41,"longitude":-114.96},"17060304":{"name":"Middle Fork Clearwater","latitude":46.1,"longitude":-115.8},"17060305":{"name":"South Fork Clearwater","latitude":45.86,"longitude":-115.79},"17060306":{"name":"Clearwater","latitude":46.46,"longitude":-116.38},"17060307":{"name":"Upper North Fork Clearwater","latitude":46.7,"longitude":-115.27},"17060308":{"name":"Lower North Fork Clearwater","latitude":46.82,"longitude":-115.94},"17070101":{"name":"Middle Columbia-Lake Wallula","latitude":45.91,"longitude":-119.77},"17070102":{"name":"Walla Walla","latitude":46.12,"longitude":-118.28},"17070103":{"name":"Umatilla","latitude":45.59,"longitude":-118.88},"17070104":{"name":"Willow","latitude":45.39,"longitude":-119.73},"17070105":{"name":"Middle Columbia-Hood","latitude":45.69,"longitude":-121.47},"17070106":{"name":"Klickitat","latitude":46.04,"longitude":-121.12},"17070201":{"name":"Upper John Day","latitude":44.38,"longitude":-119.3},"17070202":{"name":"North Fork John Day","latitude":44.93,"longitude":-119.01},"17070203":{"name":"Middle Fork John Day","latitude":44.72,"longitude":-118.86},"17070204":{"name":"Lower John Day","latitude":45.06,"longitude":-120.24},"17070301":{"name":"Upper Deschutes","latitude":44.15,"longitude":-121.58},"17070302":{"name":"Little Deschutes","latitude":43.52,"longitude":-121.62},"17070303":{"name":"Beaver-South Fork","latitude":43.88,"longitude":-120.02},"17070304":{"name":"Upper Crooked","latitude":44.14,"longitude":-120.34},"17070305":{"name":"Lower Crooked","latitude":44.1,"longitude":-120.85},"17070306":{"name":"Lower Deschutes","latitude":45.02,"longitude":-121.24},"17070307":{"name":"Trout","latitude":44.73,"longitude":-120.82},"17080001":{"name":"Lower Columbia-Sandy","latitude":45.49,"longitude":-122.08},"17080002":{"name":"Lewis","latitude":46.02,"longitude":-122.17},"17080003":{"name":"Lower Columbia-Clatskanie","latitude":46.04,"longitude":-122.92},"17080004":{"name":"Upper Cowlitz","latitude":46.53,"longitude":-121.71},"17080005":{"name":"Lower Cowlitz","latitude":46.38,"longitude":-122.56},"17080006":{"name":"Lower Columbia","latitude":46.2,"longitude":-123.69},"17090001":{"name":"Middle Fork Willamette","latitude":43.76,"longitude":-122.4},"17090002":{"name":"Coast Fork Willamette","latitude":43.72,"longitude":-122.9},"17090003":{"name":"Upper Willamette","latitude":44.41,"longitude":-123.21},"17090004":{"name":"Mckenzie","latitude":44.16,"longitude":-122.27},"17090005":{"name":"North Santiam","latitude":44.72,"longitude":-122.23},"17090006":{"name":"South Santiam","latitude":44.52,"longitude":-122.52},"17090007":{"name":"Middle Willamette","latitude":45.05,"longitude":-122.99},"17090008":{"name":"Yamhill","latitude":45.16,"longitude":-123.37},"17090009":{"name":"Molalla-Pudding","latitude":45.04,"longitude":-122.61},"17090010":{"name":"Tualatin","latitude":45.54,"longitude":-123.05},"17090011":{"name":"Clackamas","latitude":45.11,"longitude":-122.09},"17090012":{"name":"Lower Willamette","latitude":45.63,"longitude":-122.74},"17100101":{"name":"Hoh-Quillayute","latitude":47.96,"longitude":-124.32},"17100102":{"name":"Queets-Quinault","latitude":47.49,"longitude":-124.01},"17100103":{"name":"Upper Chehalis","latitude":46.71,"longitude":-123.04},"17100104":{"name":"Lower Chehalis","latitude":47.16,"longitude":-123.53},"17100105":{"name":"Grays Harbor","latitude":47.1,"longitude":-123.92},"17100106":{"name":"Willapa Bay","latitude":46.62,"longitude":-123.8},"17100201":{"name":"Necanicum","latitude":45.94,"longitude":-123.96},"17100202":{"name":"Nehalem","latitude":45.84,"longitude":-123.47},"17100203":{"name":"Wilson-Trusk-Nestuccu","latitude":45.39,"longitude":-123.75},"17100204":{"name":"Siletz-Yaquina","latitude":44.78,"longitude":-123.86},"17100205":{"name":"Alsea","latitude":44.34,"longitude":-123.89},"17100206":{"name":"Siuslaw","latitude":44.02,"longitude":-123.66},"17100207":{"name":"Siltcoos","latitude":43.87,"longitude":-124.11},"17100301":{"name":"North Umpqua","latitude":43.3,"longitude":-122.65},"17100302":{"name":"South Umpqua","latitude":42.98,"longitude":-123.17},"17100303":{"name":"Umpqua","latitude":43.61,"longitude":-123.56},"17100304":{"name":"Coos","latitude":43.4,"longitude":-124.07},"17100305":{"name":"Coquille","latitude":43.04,"longitude":-124.01},"17100306":{"name":"Sixes","latitude":42.78,"longitude":-124.41},"17100307":{"name":"Upper Rogue","latitude":42.66,"longitude":-122.5},"17100308":{"name":"Middle Rogue","latitude":42.39,"longitude":-122.95},"17100309":{"name":"Applegate","latitude":42.16,"longitude":-123.17},"17100310":{"name":"Lower Rogue","latitude":42.6,"longitude":-123.74},"17100311":{"name":"Illinois","latitude":42.27,"longitude":-123.73},"17100312":{"name":"Chetco","latitude":42.2,"longitude":-124.18},"17110001":{"name":"Sumas River","latitude":49.02,"longitude":-121.75},"17110002":{"name":"Strait of Georgia","latitude":48.85,"longitude":-122.79},"17110003":{"name":"San Juan Islands","latitude":48.66,"longitude":-123.2},"17110004":{"name":"Nooksack","latitude":48.82,"longitude":-122.18},"17110005":{"name":"Upper Skagit","latitude":48.78,"longitude":-121.2},"17110006":{"name":"Sauk","latitude":48.2,"longitude":-121.31},"17110007":{"name":"Lower Skagit","latitude":48.45,"longitude":-122.08},"17110008":{"name":"Stillaguamish","latitude":48.23,"longitude":-121.89},"17110009":{"name":"Skykomish","latitude":47.82,"longitude":-121.48},"17110010":{"name":"Snoqualmie","latitude":47.59,"longitude":-121.69},"17110011":{"name":"Snohomish","latitude":48,"longitude":-122.04},"17110012":{"name":"Lake Washington","latitude":47.57,"longitude":-122.05},"17110013":{"name":"Duwamish","latitude":47.29,"longitude":-121.85},"17110014":{"name":"Puyallup","latitude":47.05,"longitude":-121.88},"17110015":{"name":"Nisqually","latitude":46.85,"longitude":-122.28},"17110016":{"name":"Deschutes","latitude":46.86,"longitude":-122.64},"17110017":{"name":"Skokomish","latitude":47.44,"longitude":-123.33},"17110018":{"name":"Hood Canal","latitude":47.66,"longitude":-122.98},"17110019":{"name":"Puget Sound","latitude":47.64,"longitude":-122.64},"17110020":{"name":"Dungeness-Elwha","latitude":48.12,"longitude":-123.27},"17110021":{"name":"Crescent-Hoko","latitude":48.48,"longitude":-124.23},"17120001":{"name":"Harney-Malheur Lakes","latitude":43.36,"longitude":-118.83},"17120002":{"name":"Silvies","latitude":43.85,"longitude":-119.1},"17120003":{"name":"Donner und Blitzen","latitude":42.88,"longitude":-118.75},"17120004":{"name":"Silver","latitude":43.4,"longitude":-119.55},"17120005":{"name":"Summer Lake","latitude":43.2,"longitude":-120.62},"17120006":{"name":"Lake Abert","latitude":42.63,"longitude":-120.43},"17120007":{"name":"Warner Lakes","latitude":42.41,"longitude":-119.9},"17120008":{"name":"Guano","latitude":42.37,"longitude":-119.29},"17120009":{"name":"Alvord Lake","latitude":42.42,"longitude":-118.38}}
+//load PTAGIS metadata files
+
+	
+function initPTAGIS(intsites,mrrsites,basins_sites){
+	console.log(arguments)
+	var sitemap = {}
+	intsites.forEach(function(d){
+		if(!sitemap[d["Interrogation Site Code"]]){
+			sitemap[d["Interrogation Site Code"]] = {
+				code: d["Interrogation Site Code"],
+				name: d["Interrogation Site Name"],
+				group: "Interrogation",
+				type: d["Site Type Name"],
+				subbasin_code: d["Interrogation Site Subbasin Code"],
+				basin_code: d["Interrogation Site Subbasin Code"].substring(0,6),
+				location: [
+					{
+						isActive: d["Int Site Active"] =="1" ? true : false,
+						start_date: d["Interrogation Site Location Start"],
+						end_date: d["Interrogation Site Location End"],
+						latitude: +d["Interrogation Site Location Latitude"],
+						longitude: +d["Interrogation Site Location Longitude"],
+						rkm: d["Interrogation Site Location RKM"]
+					}
+				],
+				rkm: d["Interrogation Site Location RKM"],
+				latitude: +d["Interrogation Site Location Latitude"],
+				longitude: +d["Interrogation Site Location Longitude"]				
+			}
+		}
+		else sitemap[d["Interrogation Site Code"]].location.push({
+			isActive: d["Int Site Active"] =="1" ? true : false,
+			start_date: d["Interrogation Site Location Start"],
+			end_date: d["Interrogation Site Location End"],
+			latitude: +d["Interrogation Site Location Latitude"],
+			longitude: +d["Interrogation Site Location Longitude"],
+			rkm: d["Interrogation Site Location RKM"]			
+		})
+	})
+	console.log(Object.keys(sitemap).length)
+	mrrsites.forEach(function(d){
+		if(!sitemap[d["MRR Site Info Code"]]){
+			sitemap[d["MRR Site Info Code"]] = {
+				code: d["MRR Site Info Code"],
+				name: d["MRR Site Info Name"],
+				group: "MRR",
+				type: d["MRR Site Type Name"],
+				subbasin_code: d["MRR Site Subbasin Code"],
+				basin_code: d["MRR Site Subbasin Code"].substring(0,6),
+				location: [
+					{
+						latitude: +d["MRR Site Latitude Value"],
+						longitude: +d["MRR Site Longitude Value"],
+						rkm: d["MRR Site Info RKM Mask"]
+					}
+				],
+				rkm: d["MRR Site Info RKM Mask"],
+				latitude: +d["MRR Site Latitude Value"],
+				longitude: +d["MRR Site Longitude Value"]							
+			}
+		}
+	})
+	
+	params.sitemap = sitemap;
+	
+	Object.keys(sitemap).forEach(function(code){
+		sitemap[code].location.forEach(function(d){
+			if(envirosites[d.rkm])sitemap[code].envirosites = envirosites[d.rkm];
+			else sitemap[code].envirosites = [];
+		})
+	})
+	
+	
+	params.edata = new EnviroData({sitemap: sitemap})
+	params.enviroevent = new EnviroEvent({sitemap: sitemap})
+	
+	params.fishtracks = new FishTracks({basins_sites: basins_sites})
+	
+	document.getElementById("spinner").style.visibility = 'hidden';
+	params.progressbar = new ProgressBar();
+	
+	d3.selectAll("input.prune_level").on("change",function(){params.fishdata.purge_level = this.value;})
+	d3.selectAll("input.remove_zeroevents").on("change",function(){params.fishdata.remove_zeroevents = this.value;})
+	
+	d3.select(".layer-control")
+		.style("display","block")
+		
+	d3.selectAll(".popup-dialog")
+		.each(function(d){
+			this.addEventListener('click', function(evt){
+				d3.selectAll(".popup-dialog").style("display","none");
+				d3.selectAll("span.header-btn").classed("active",false)
+				d3.select("#leafmap").style("z-index",'auto')
+				if(params.fishdata.datasets.length == 0){
+					d3.select(".layer-control")
+						.style("display","block")					
+				}			
+			}, false);		
+		})
+		
+	d3.selectAll(".close2-btn")
+		.each(function(d){
+			this.addEventListener('click', function(evt){
+				d3.selectAll(".popup-dialog").style("display","none");
+				d3.selectAll("span.header-btn").classed("active",false)
+				if(params.fishdata.datasets.length == 0){
+					d3.select(".layer-control")
+						.style("display","block")	
+				}
+				else d3.select("#leafmap").style("z-index",'auto')
+			}, false);		
+		})
+		
+	d3.selectAll(".info-box")
+		.each(function(){
+			this.addEventListener('click', function(evt){evt.stopPropagation()}, false);
+		})
+		
+	d3.select("#fishfilter_export")
+		.on("click",function(){
+			d3.selectAll("span.header-btn").classed("active",false)
+			d3.selectAll(".popup-dialog").style("display","none")
+			d3.select("#leafmap").style("z-index",-1)
+				d3.select(".export-options")
+					.style("display","block")
+			d3.select("#export_execute")
+				.on("click",function(){
+					let exporter = new Exporter(
+						{
+							data: params.fishfilter.filteredData(),
+							export_options: params.export_options["FishFilter"]
+						})
+					exporter.doExport()
+				})
+			d3.selectAll(".export_format")
+				.on("click",function(){
+					params.export_options["FishFilter"].filetype = this.value;
+				})
+		})
+		
+	d3.selectAll(".cancel-btn")
+		.each(function(d){
+			this.addEventListener('click', function(evt){
+				d3.select("#leafmap").style("z-index",'auto')
+				d3.selectAll(".popup-dialog").style("display","none");
+				d3.selectAll("span.header-btn").classed("active",false)
+				if(params.fishdata.datasets.length == 0){
+					d3.select(".layer-control")
+						.style("display","block")						
+				}			
+			}, false);		
+		})	
+		
+	d3.selectAll("span.header-btn")	
+		.on("click",function(){
+			let btn = d3.select(this)
+			let classes = btn.attr("class").split(" ")
+			if(classes.includes("active")){
+				btn.classed("active",false)
+				d3.selectAll(".popup-dialog").style("display","none")
+				d3.select("#leafmap").style("z-index",'auto')
+				if(params.fishdata.datasets.length == 0){
+					d3.select(".layer-control")
+						.style("display","block")	
+				}
+				d3.select("#leafmap").style("z-index",'auto')	
+			}
+			else{
+				d3.selectAll("span.header-btn").classed("active",false)
+				d3.selectAll(".popup-dialog").style("display","none")
+				btn.classed("active",true)
+				classes.forEach(function(d){
+					switch(d) {
+					  case "layer-name":
+						d3.select(".layer-control")
+							.style("display","block")
+						break;
+					  case "options-btn":
+						d3.select(".simplify-options")
+							.style("display","block")	
+						break;
+					  case "help-btn":
+						d3.select(".help-options")
+							.style("display","block")	
+						break;
+					  case "about-btn":
+						d3.select(".about-options")
+							.style("display","block")	
+						break;						
+					  default:
+						// do nothing
+					}
+					d3.select("#leafmap").style("z-index",-1)
+				})
+			}
+		})
+	console.log("initPTAGIS completed")
+}
+
+function processQueryString(){
+
+	var urlParams = new URLSearchParams(window.location.search);
+	//can get multiple as follows
+	//console.log(urlParams.getAll('test'))
+	if(urlParams.has('get_attributes')){
+		params.get_attributes = +urlParams.get('get_attributes') ? true : false;
+	}
+	if(urlParams.has('filename')){
+		let filename=urlParams.get('filename')
+		let date = new Date()
+		let file = {
+			name: filename,
+			lastModified: date.getTime(),
+			lastModifiedDate: date,
+			type: "text/csv"
+		}
+		params.progressbar.init()
+		d3.xhr(filename)
+			.on("progress", function(event) {
+				//update progress bar
+				  var percentComplete = Math.round(d3.event.loaded * 100 / d3.event.total);
+				  params.progressbar.updateProgress(d3.event.loaded,d3.event.total,"fetching file")
+			})
+			.get(function (err1, response) {
+				var newfish = new PTAGIS({file: file, processor: params.fishdata, result: response.responseText})
+				params.handlers.process_remote_file()
+				console.log("processQueryString completed")
+			})
+	}
+	else console.log("processQueryString completed")
+}
+
+function initAll(error,intsites,mrrsites,basins_sites){
+	initPTAGIS(intsites,mrrsites,basins_sites);
+	processQueryString();
+}
+
+//*******************************************Starting Ops here
+params.fishdata = new FishFarm()
+
+queue()
+	.defer(d3.csv, 'All Interrogation Sites Table.csv')
+	.defer(d3.csv, 'All MRR Sites Table.csv')
+	.defer(d3.json, 'PTAGIS_Basins_Sites_JSON.txt')
+	.await(initAll);
+
+function uniq(a) {
+    var prims = {"boolean":{}, "number":{}, "string":{}}, objs = [];
+
+    return a.filter(function(item) {
+        var type = typeof item;
+        if(type in prims)
+            return prims[type].hasOwnProperty(item) ? false : (prims[type][item] = true);
+        else
+            return objs.indexOf(item) >= 0 ? false : objs.push(item);
+    });
+}
+
+if (!Array.prototype.includes) {
+  Array.prototype.includes = function(searchElement /*, fromIndex*/ ) {
+    'use strict';
+    var O = Object(this);
+    var len = parseInt(O.length) || 0;
+    if (len === 0) {
+      return false;
+    }
+    var n = parseInt(arguments[1]) || 0;
+    var k;
+    if (n >= 0) {
+      k = n;
+    } else {
+      k = len + n;
+      if (k < 0) {k = 0;}
+    }
+    var currentElement;
+    while (k < len) {
+      currentElement = O[k];
+      if (searchElement === currentElement ||
+         (searchElement !== searchElement && currentElement !== currentElement)) {
+        return true;
+      }
+      k++;
+    }
+    return false;
+  };
+}	
+
+// https://tc39.github.io/ecma262/#sec-array.prototype.findIndex
+if (!Array.prototype.findIndex) {
+  Object.defineProperty(Array.prototype, 'findIndex', {
+    value: function(predicate) {
+     // 1. Let O be ? ToObject(this value).
+      if (this == null) {
+        throw new TypeError('"this" is null or not defined');
+      }
+
+      var o = Object(this);
+
+      // 2. Let len be ? ToLength(? Get(O, "length")).
+      var len = o.length >>> 0;
+
+      // 3. If IsCallable(predicate) is false, throw a TypeError exception.
+      if (typeof predicate !== 'function') {
+        throw new TypeError('predicate must be a function');
+      }
+
+      // 4. If thisArg was supplied, let T be thisArg; else let T be undefined.
+      var thisArg = arguments[1];
+
+      // 5. Let k be 0.
+      var k = 0;
+
+      // 6. Repeat, while k < len
+      while (k < len) {
+        // a. Let Pk be ! ToString(k).
+        // b. Let kValue be ? Get(O, Pk).
+        // c. Let testResult be ToBoolean(? Call(predicate, T, Â« kValue, k, O Â»)).
+        // d. If testResult is true, return k.
+        var kValue = o[k];
+        if (predicate.call(thisArg, kValue, k, o)) {
+          return k;
+        }
+        // e. Increase k by 1.
+        k++;
+      }
+
+      // 7. Return -1.
+      return -1;
+    }
+	});
+
+}
+
+let envirosites = {
+	"234": 
+	[
+		{"sitecode": "BON","name": "Bonneville Forebay","rkm": "235","bank": "Right Bank","location": "Forebay","latitude": 45.64580556,"longitude": -121.9404722,"subbasin_code": 17070105, "datasource": "DART"},
+		{"sitecode": "CCIW","name": "Cascades Island","rkm": "235","bank": "Right Bank","location": "Tailwater","latitude": 45.64588889,"longitude": -121.9464444,"subbasin_code": 17080001, "datasource": "DART"}
+	],
+	"308":
+	[
+		{"sitecode": "TDA","name": "The Dalles Forebay","rkm": "310","bank": "Left Bank","location": "Forebay","latitude": 45.61986111,"longitude": -121.12125,"subbasin_code": 17070105, "datasource": "DART"},
+		{"sitecode": "TDDO","name": "The Dalles Tailwater","rkm": "304","bank": "Left Bank","location": "Tailwater","latitude": 45.60825,"longitude": -121.1899444,"subbasin_code": 17070105, "datasource": "DART"}
+	],
+	"347":
+	[
+		{"sitecode": "JDA","name": "John Day Forebay","rkm": "347","bank": "Right Bank","location": "Forebay","latitude": 45.72052778,"longitude": -120.6946389,"subbasin_code": 17070101, "datasource": "DART"},
+		{"sitecode": "JHAW","name": "John Day Tailwater","rkm": "346","bank": "Right Bank","location": "Forebay","latitude": 45.71341667,"longitude": -120.7108889,"subbasin_code": 17070105, "datasource": "DART"}	
+	],
+	"470":
+	[
+		{"sitecode": "MCN","name": "McNary Forebay","rkm": "470","bank": "Right Bank","location": "Forebay","latitude": 45.94133333,"longitude": -119.2931944,"subbasin_code": 17070101, "datasource": "DART"},
+		{"sitecode": "MCPW","name": "McNary Tailwater","rkm": "468","bank": "Right Bank","location": "Tailwater","latitude": 45.93411111,"longitude": -119.3265278,"subbasin_code": 17070101, "datasource": "DART"}	
+	],
+	"522.016":
+	[
+		{"sitecode": "IHR","name": "Ice Harbor Forebay","rkm": "522.016","bank": "Right Bank","location": "Forebay","latitude": 46.25161111,"longitude": -118.8775,"subbasin_code": 17060110, "datasource": "DART"},
+		{"sitecode": "IDSW","name": "Ice Harbor Tailwater","rkm": "522.010","bank": "Right Bank","location": "Tailwater","latitude": 46.241,"longitude": -118.9538056,"subbasin_code": 17060110, "datasource": "DART"}	
+	],
+	"522.067":
+	[
+		{"sitecode": "LMN","name": "Lower Monumental Forebay","rkm": "522.067","bank": "Mid-River","location": "Forebay","latitude": 46.56255556,"longitude": -118.5345556,"subbasin_code": 17060110, "datasource": "DART"},
+		{"sitecode": "LMNW","name": "Lower Monumental Tailwater","rkm": "522.065","bank": "Right Bank","location": "Tailwater","latitude": 46.55125,"longitude": -118.5497222,"subbasin_code": 17070101, "datasource": "DART"}	
+	],
+	"522.113":
+	[
+		{"sitecode": "LGS","name": "Little Goose Forebay","rkm": "522.113","bank": "Left Bank","location": "Forebay","latitude": 46.583,"longitude": -118.0247778,"subbasin_code": 17060107, "datasource": "DART"},
+		{"sitecode": "LGSW","name": "Little Goose Tailwater","rkm": "522.112","bank": "Right Bank","location": "Tailwater","latitude": 46.58347222,"longitude": -118.0437222,"subbasin_code": 17060107, "datasource": "DART"}	
+	],	
+	"522.173":
+	[
+		{"sitecode": "LWG","name": "Lower Granite Forebay","rkm": "522.173","bank": "Mid-River","location": "Forebay","latitude": 46.6595,"longitude": -117.4263611,"subbasin_code": 17060107, "datasource": "DART"},
+		{"sitecode": "LGNW","name": "Lower Granite Tailwater","rkm": "522.172","bank": "Right Bank","location": "Tailwater","latitude": 46.66613889,"longitude": -117.4386944,"subbasin_code": 17060107, "datasource": "DART"},	
+	],
+	"639":
+	[
+		{"sitecode": "PRD","name": "Priest Rapids Forebay","rkm": "639","bank": "Mid-River","location": "Forebay","latitude": 46.64444444,"longitude": -119.91,"subbasin_code": 17020016, "datasource": "DART"},
+		{"sitecode": "PRXW","name": "Priest Rapids Tailwater","rkm": "637","bank": "Mid-River","location": "Tailwater","latitude": 46.64194444,"longitude": -119.7325,"subbasin_code": 17020016, "datasource": "DART"}	
+	],
+	"669":
+	[
+		{"sitecode": "WAN","name": "Wanapum Forebay","rkm": "669","bank": "Mid-River","location": "Forebay","latitude": 46.87472222,"longitude": -119.9713889,"subbasin_code": 17020010, "datasource": "DART"},
+		{"sitecode": "WANW","name": "Wanapum Tailwater","rkm": "665","bank": "Mid-River","location": "Tailwater","latitude": 46.83361111,"longitude": -119.9422222,"subbasin_code": 17020010, "datasource": "DART"}	
+	],
+	"730":
+	[
+		{"sitecode": "RIS","name": "Rock Island Forebay","rkm": "731","bank": "Right Bank","location": "Forebay","latitude": 47.33972222,"longitude": -120.0941667,"subbasin_code": 17020010, "datasource": "DART"},
+		{"sitecode": "RIGW","name": "Rock Island Tailwater","rkm": "729","bank": "Left Bank","location": "Tailwater","latitude": 47.33027778,"longitude": -120.0813889,"subbasin_code": 17020010, "datasource": "DART"}	
+	],
+	"763":
+	[
+		{"sitecode": "RRH","name": "Rocky Reach Forebay","rkm": "763","bank": "Right Bank","location": "Forebay","latitude": 47.53361111,"longitude": -120.2958333,"subbasin_code": 17020010, "datasource": "DART"},
+		{"sitecode": "RRDW","name": "Rocky Reach Tailwater","rkm": "760","bank": "Mid-River","location": "Tailwater","latitude": 47.47111111,"longitude": -120.3166667,"subbasin_code": 17020010, "datasource": "DART"}	
+	],
+	"830":
+	[
+		{"sitecode": "WEL","name": "Wells Forebay","rkm": "829","bank": "","location": "Forebay","latitude": 47.94166667,"longitude": -119.8591667,"subbasin_code": 17020005, "datasource": "DART"},
+		{"sitecode": "WELW","name": "Wells Tailwater","rkm": "824","bank": "Left Bank","location": "Tailwater","latitude": 47.90777778,"longitude": -119.8908333,"subbasin_code": 17020005, "datasource": "DART"}	
+	],		
+}
+
+let project = {
+	reqs:[
+	
+	],
+	modules:[
+		{class: "FishFilter"},
+		{class: "FishTracks"},
+		
+	
+	]
+}
+
+
+
+
+
+
+</script>
+<!--
+ToDo list
+
+1) redo fishtracks using Canvas
+	https://medium.com/@xoor/implementing-charts-that-scale-with-d3-and-canvas-3e14bbe70f37
+	https://xoor.io/en/blog/mastering-d3-js-part-3-brush-and-zoom/
+	https://xoor-io.github.io/d3-canvas-example/03_scatterplot_with_box_zoom/index.html
+	
+2) make fishfilter customized
+	a) if single-valued, only display that value (as text)
+	b) collapseable
+	c) add scrolling
+	d) export values to CSV
+	
+3) a way to clear data (without reloading)
+
+
+-->
